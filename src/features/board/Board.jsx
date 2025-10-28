@@ -52,9 +52,9 @@ function Board() {
     useEffect(() => {
         const handleKeyDown = (event) => {
             const key = event.key.toLowerCase();
-            if (["w", "a", "s", "d"].includes(key)) {
+            if (["w", "a", "s", "d", "e"].includes(key)) {
                 console.log(`Pressed ${key.toUpperCase()}`);
-                fetchBoard(); // refresca tablero
+                fetchBoard();
             }
         };
 
