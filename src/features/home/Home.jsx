@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Home.css";
 import DinoLogo2 from "../../../public/resources/DinoLogo2.png"; // logo dinochomp
-import DinoNombre from "../../../public/resources/DinoNombre.png"; // logo dinochomp
+import DinoNombre from "../../../public/resources/DinoName.png"; // logo dinochomp
 
 function Home() {
   const navigate = useNavigate();

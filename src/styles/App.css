@@ -42,7 +42,7 @@
 }
 
 body {
-    background-image: url('../../public/resources/DinoFondo.png');
+    background-image: url('../../public/resources/DinoBackground.png');
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center center;
