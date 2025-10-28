@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import "../../styles/Board.css";
 import Tile from "../../components/game/Tile.jsx";
 import Food from "../../components/game/Food.jsx";
@@ -13,41 +13,54 @@ function Board() {
     const [foods, setFoods] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function fetchBoard() {
-            try {
-                const data = await getBoard("69005f3aac5bfb027fff2528"); // TODO Cambiar cuando se pueda obtener el id del board
-                const parsed = parseBoard(data);
-                setBoard(parsed);
+    const fetchBoard = useCallback(async () => {
+        try {
+            const data = await getBoard("69005f3aac5bfb027fff2528"); // TODO: cambiar luego
+            const parsed = parseBoard(data);
+            setBoard(parsed);
 
-                const foundPlayers = parsed.cells
-                    .filter(c => c.item && c.item.type === "PLAYER")
-                    .map(p => ({
-                        id: p.item.id,
-                        name: p.item.name,
-                        health: p.item.health,
-                        avatar: "/resources/DinoTRex.png",
-                        position: { row: p.y, col: p.x }
-                    }));
+            const foundPlayers = parsed.cells
+                .filter(c => c.item && c.item.type === "PLAYER")
+                .map(p => ({
+                    id: p.item.id,
+                    name: p.item.name,
+                    health: p.item.health,
+                    avatar: "/resources/DinoTRex.png",
+                    position: { row: p.y, col: p.x },
+                }));
 
-                const foundFoods = parsed.cells
-                    .filter(c => c.item && c.item.type === "FOOD")
-                    .map(f => ({
-                        id: f.item.id,
-                        position: { row: f.y, col: f.x }
-                    }));
+            const foundFoods = parsed.cells
+                .filter(c => c.item && c.item.type === "FOOD")
+                .map(f => ({
+                    id: f.item.id,
+                    position: { row: f.y, col: f.x },
+                }));
 
-                setPlayers(foundPlayers);
-                setFoods(foundFoods);
-            } catch (error) {
-                console.error("Error loading board", error);
-            } finally {
-                setLoading(false);
-            }
+            setPlayers(foundPlayers);
+            setFoods(foundFoods);
+        } catch (error) {
+            console.error("Error loading board", error);
+        } finally {
+            setLoading(false);
         }
-
-        fetchBoard();
     }, []);
+
+    useEffect(() => {
+        fetchBoard();
+    }, [fetchBoard]);
+
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            const key = event.key.toLowerCase();
+            if (["w", "a", "s", "d"].includes(key)) {
+                console.log(`Pressed ${key.toUpperCase()}`);
+                fetchBoard(); // refresca tablero
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [fetchBoard]);
 
     if (loading) return <p>Loading...</p>;
     if (!board) return <p>The board could not be loaded.</p>;
@@ -64,8 +77,9 @@ function Board() {
 
             <div className="board">
                 {Array.from({ length: board.height }).map((_, rowIndex) => (
-                    <div key={rowIndex} className="board-row">
+                    <div key={`row-${rowIndex}`} className="board-row">
                         {Array.from({ length: board.width }).map((_, colIndex) => {
+                            const tileKey = rowIndex * board.width + colIndex; // ✅ clave estable
                             const playerHere = players.find(
                                 (p) => p.position.row === rowIndex && p.position.col === colIndex
                             );
@@ -74,7 +88,7 @@ function Board() {
                             );
 
                             return (
-                                <Tile key={`${rowIndex}-${colIndex}`} size="6vw">
+                                <Tile key={`tile-${tileKey}`} size="6vw">
                                     {foodHere && <Food />}
                                     {playerHere && (
                                         <img
@@ -92,4 +106,5 @@ function Board() {
         </div>
     );
 }
+
 export default Board;
