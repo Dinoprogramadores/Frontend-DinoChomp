@@ -22,7 +22,7 @@ html, body {
   text-align: center;
 
   /* Fondo */
-  background-image: url('../assets/DinoFondo.png');
+  background-image: url('../../public/resources/DinoFondo.png');
   background-repeat: no-repeat;
   background-size: cover;   /* cubre toda la pantalla */
   background-position: center center; /* centra el fondo horizontal y verticalmente */
