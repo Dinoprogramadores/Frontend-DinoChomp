@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../styles/SelectDino.css";
-import DinoLogo2 from "../../../public/resources/DinoLogo2.png";
+import DinoLogo2 from "../../../public/resources/DinoTRex.png";
 
 function SelectDino() {
     const location = useLocation();
@@ -27,8 +27,8 @@ function SelectDino() {
     }, [gameName]);
 
     const handleSelect = (dino) => {
-        // Navigate to the next screen (for now /waiting-room) passing the selection
-        navigate("/waiting-room", { state: { gameName, dino } });
+        // Navigate to the next screen (for now /lobby) passing the selection
+        navigate("/lobby", { state: { gameName, dino } });
     };
 
     return (

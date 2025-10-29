@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../styles/Lobby.css";
-import DinoLogo2 from "../../../public/resources/DinoLogo2.png";
+import DinoLogo2 from "../../../public/resources/DinoTRex.png";
 
 function Lobby() {
     const navigate = useNavigate();
@@ -33,7 +33,7 @@ function Lobby() {
     const handleStart = () => {
         // Logic to start the game (future implementation)
         console.log("Starting the game...");
-        // navigate("/board", { state: { gameName } });
+        navigate("/board", { state: { gameName } });
     };
 
     return (

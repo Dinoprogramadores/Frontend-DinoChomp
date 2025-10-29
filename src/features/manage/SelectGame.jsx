@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/SelectGame.css";
 import DinoLogo2 from "../../../public/resources/DinoLogo2.png";
-import DinoNombre from "../../../public/resources/DinoNombre.png";
-import JoinGame from "./JoinGame";
+import DinoNombre from "../../../public/resources/DinoName.png";
+import JoinGame from "../../components/manage/JoinGame.jsx";
 
 function SelectGame() {
     const navigate = useNavigate();
