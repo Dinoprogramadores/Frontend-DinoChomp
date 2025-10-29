@@ -40,14 +40,6 @@
     mix-blend-mode: multiply;
 }
 
-.tile:hover {
-    transform: scale(1.05);
-    box-shadow:
-            inset 1px 1px 0 #6fdc6f,
-            inset -1px -1px 0 #2d682d,
-            0 0 10px rgba(0, 255, 0, 0.3);
-}
-
 .tile > * {
     position: absolute;
     inset: 0;

@@ -1,5 +1,5 @@
 import React from "react";
-import "../../styles/Tile.css";
+import "../../styles/board/Tile.css";
 
 function Tile({ size = "100px", children }) {
     return (
