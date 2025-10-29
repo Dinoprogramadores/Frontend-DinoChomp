@@ -7,22 +7,25 @@ import Power from "../../components/game/Power.jsx";
 import { parseBoard } from "./parseBoard.js";
 import { getBoard } from "../../services/BoardService.js";
 import { connectSocket, sendMove, startGame, stopGame } from "../../services/Socket.js";
+import {getBoardIdByGame} from "../../services/GameService.js";
 
 function Board() {
+
   const [board, setBoard] = useState(null);
   const [players, setPlayers] = useState([]);
   const [foods, setFoods] = useState([]);
   const [loading, setLoading] = useState(true);
+  const gameId = localStorage.getItem("currentGameId");
+  const playerId = localStorage.getItem("playerId");
 
-  const gameId = localStorage.getItem("currentGameId"); // ID en cache
-  const playerId = localStorage.getItem("playerId"); // ID en cache
 
   /**
    * Carga inicial del tablero desde el backend (estado base del juego)
    */
   const fetchBoard = useCallback(async () => {
-    try {
-      const data = await getBoard("69005f3aac5bfb027fff2528");
+      try {
+      const boardId = await getBoardIdByGame(gameId);
+      const data = await getBoard(boardId);
       const parsed = parseBoard(data);
       setBoard(parsed);
 
@@ -80,9 +83,11 @@ function Board() {
   /**
    * Conexión al socket para recibir actualizaciones en tiempo real
    */
+
   useEffect(() => {
     connectSocket(gameId, (updatedPlayers) => {
-      setPlayers(updatedPlayers);
+        console.log("Actualización recibida por socket:", updatedPlayers);
+        setPlayers(updatedPlayers);
     }, playerId);
 
     // Inicia el bucle del juego 1s después de conectar

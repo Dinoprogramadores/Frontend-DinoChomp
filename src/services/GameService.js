@@ -32,3 +32,15 @@ export const addPlayerDinosaur = async (gameId, playerId, dinosaurData) => {
 
     return response.json();
 };
+
+export const getBoardIdByGame = async (gameId) => {
+    const response = await fetch(`${BASE_URL}/${gameId}/board`);
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error fetching boardId: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    return data.boardId;
+};
