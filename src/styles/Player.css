@@ -1,0 +1,87 @@
+.game-layout {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+    padding: 40px;
+}
+
+.player-list {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    background: rgba(30, 20, 10, 0.7);
+    padding: 20px;
+    border-radius: 16px;
+    color: white;
+    min-width: 220px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+}
+
+.player-list-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-align: center;
+    width: 100%;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 6px;
+}
+
+.player-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(180deg, #5a371a 0%, #3e2512 100%);
+    border: 1px solid #2e1502;
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+    width: 90%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.player-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+}
+
+.player-avatar {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+
+.player-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+.player-name {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 6px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.player-health-bar {
+    background: #2c1810;
+    border-radius: 6px;
+    height: 10px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.player-health-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    background-color: var(--hp-color, #2ecc71);
+}
+
