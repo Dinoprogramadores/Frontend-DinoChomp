@@ -1,0 +1,72 @@
+.join-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.join-modal {
+  background: #3e2723;
+  color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 420px;
+  max-width: calc(100vw - 40px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.join-modal h3 {
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
+.join-form input[type="text"] {
+  width: 90%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.join-error {
+  color: #ff6b6b; /* rojo claro para errores */
+  background: rgba(255, 107, 107, 0.06);
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.join-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 6px;
+}
+
+.join-ok, .join-cancel {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.join-ok {
+  background: #8443da;
+  color: white;
+}
+
+.join-cancel {
+  background: #777;
+  color: white;
+}
+
+.join-ok:disabled, .join-cancel:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
