@@ -4,10 +4,11 @@ import Tile from "../../components/game/Tile.jsx";
 import Food from "../../components/game/Food.jsx";
 import PlayerList from "../players/PlayerList.jsx";
 import Power from "../../components/game/Power.jsx";
+import Timer from "../../components/game/Timer.jsx";
 import { parseBoard } from "./parseBoard.js";
 import { getBoard } from "../../services/BoardService.js";
 import { connectSocket, sendMove, startGame, stopGame } from "../../services/Socket.js";
-import {getBoardIdByGame} from "../../services/GameService.js";
+import { getBoardIdByGame, getGameData } from "../../services/GameService.js";
 
 function Board() {
 
@@ -15,6 +16,7 @@ function Board() {
   const [players, setPlayers] = useState([]);
   const [foods, setFoods] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [durationMinutes, setDurationMinutes] = useState(null);
   const gameId = localStorage.getItem("currentGameId");
   const playerId = localStorage.getItem("playerId");
 
@@ -28,6 +30,13 @@ function Board() {
       const data = await getBoard(boardId);
       const parsed = parseBoard(data);
       setBoard(parsed);
+
+      // Obtener datos del juego incluida la duración
+      const gameData = await getGameData(gameId);
+      if (gameData.durationMinutes) {
+        setDurationMinutes(gameData.durationMinutes);
+        console.log(`⏱️ Duración del juego: ${gameData.durationMinutes} minutos`);
+      }
 
       const foundPlayers = parsed.cells
         .filter(c => c.item && c.item.type === "PLAYER")
@@ -106,6 +115,7 @@ function Board() {
     <div className="game-layout">
       {/* Panel lateral con lista de jugadores y botón de poder */}
       <div className="sidebar">
+        <Timer durationMinutes={durationMinutes} gameId={gameId} />
         <PlayerList players={players} />
         <button className="image-button">
           <Power />
