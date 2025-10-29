@@ -1,0 +1,55 @@
+.select-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.select-name {
+  width: 400px;
+  height: auto;
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(2px 2px 5px rgba(0, 0, 0, 0.6));
+}
+
+.select-logo {
+  width: 180px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+/* Panel que reutiliza la paleta/estilo de Board.css */
+.select-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background-color: #3e2723; /* mismo color que .board */
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.select-button {
+  background-color: #8443da;
+  color: white;
+  border: none;
+  padding: 0.9rem 2rem;
+  font-size: 1.2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  width: 220px;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.select-button:hover {
+  background-color: #2f792f;
+  transform: scale(1.05);
+}
+
