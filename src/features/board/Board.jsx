@@ -6,12 +6,17 @@ import PlayerList from "../players/PlayerList.jsx";
 import { parseBoard } from "./parseBoard.js";
 import { getBoard } from "../../services/CommonService.js";
 import Power from "../../components/game/Power.jsx";
+import { connectSocket, sendMove, startGame } from "../../services/Socket.js";
 
 function Board() {
     const [board, setBoard] = useState(null);
     const [players, setPlayers] = useState([]);
     const [foods, setFoods] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const gameId = "69005f3aac5bfb027fff2528"; // Puedes pasarlo como prop más adelante
+    const playerId = "player-123"; // Reemplaza con el ID real del jugador
+
 
     const fetchBoard = useCallback(async () => {
         try {
@@ -66,9 +71,9 @@ function Board() {
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [fetchBoard]);
+    }, [playerId, gameId]);
     // Conexión al socket para actualizaciones en tiempo real
-    seEffect(() => {
+    useEffect(() => {
         connectSocket(gameId, (updatedPlayersMap) => {
             const updatedPlayers = Object.values(updatedPlayersMap).map((p) => ({
                 id: p.id,
@@ -79,7 +84,18 @@ function Board() {
             }));
             setPlayers(updatedPlayers);
         });
+        // inicia el juego del socket
+        const timer = setTimeout(() => {
+            startGame(gameId);
+        }, 1000);
+
+        return () => {
+            clearTimeout(timer);
+            stopGame(gameId); // detiene el bucle si se abandona el tablero
+        };
+
     }, []);
+    
 
     if (loading) return <p>Loading...</p>;
     if (!board) return <p>The board could not be loaded.</p>;
