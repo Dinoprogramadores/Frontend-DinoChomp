@@ -8,7 +8,7 @@ function Home() {
   const navigate = useNavigate();
 
   const handleStart = () => {
-    navigate("/board"); // TODO cambiar a pantalla de gestión de partida
+    navigate("/select"); // navegamos a la nueva pantalla de selección
   };
 
   return (
