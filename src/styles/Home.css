@@ -20,12 +20,6 @@ html, body {
   justify-content: center;
   align-items: center;
   text-align: center;
-
-  /* Fondo */
-  background-image: url('../assets/DinoFondo.png');
-  background-repeat: no-repeat;
-  background-size: cover;   /* cubre toda la pantalla */
-  background-position: center center; /* centra el fondo horizontal y verticalmente */
 }
 
 /* Imagen del nombre del juego */

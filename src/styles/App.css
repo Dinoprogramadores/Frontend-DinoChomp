@@ -40,3 +40,10 @@
 .read-the-docs {
   color: #888;
 }
+
+body {
+    background-image: url('../../public/resources/DinoBackground.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+}
