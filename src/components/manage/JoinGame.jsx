@@ -33,8 +33,7 @@ function JoinGame({ onClose }) {
                 setError(msg || `Error: ${res.status}`);
                 return false;
             }
-
-            // OK
+            localStorage.setItem("currentGameId", gameName);
             return true;
         } catch (err) {
             setError(err?.message || "Network error");
@@ -54,7 +53,6 @@ function JoinGame({ onClose }) {
 
         const ok = await checkGameExists(trimmed);
         if (ok) {
-            // Backend indicated that the game exists: move to dino selection screen
             navigate("/select-dino", { state: { gameName: trimmed } });
         }
     };
