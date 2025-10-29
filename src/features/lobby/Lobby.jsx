@@ -33,7 +33,7 @@ function Lobby() {
     const handleStart = () => {
         // Logic to start the game (future implementation)
         console.log("Starting the game...");
-        navigate("/board", { state: { gameName } });
+        navigate("/game-board", { state: { gameName } });
     };
 
     return (

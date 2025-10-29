@@ -1,62 +1,142 @@
 // src/components/Board.jsx
-import React, { Component } from "react";
-import { connectSocket, sendMove, stopGame, disconnectSocket } from "../services/Socket";
+import React, { useEffect, useState, useCallback } from "react";
+import "../../styles/board/Board.css";
+import Tile from "../../components/game/Tile.jsx";
+import Food from "../../components/game/Food.jsx";
+import PlayerList from "../players/PlayerList.jsx";
+import Power from "../../components/game/Power.jsx";
+import { parseBoard } from "./parseBoard.js";
+import { getBoard } from "../../services/BoardService.js";
+import { connectSocket, sendMove, startGame, stopGame } from "../../services/Socket.js";
 
-export default class Board extends Component {
-    constructor(props) {
-        super(props);
-        this.state = { players: [], gameStarted: false };
-    }
+function Board() {
+    const [board, setBoard] = useState(null);
+    const [players, setPlayers] = useState([]);
+    const [foods, setFoods] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    componentDidMount() {
-        const { gameId } = this.props;
+    const gameId = localStorage.getItem("currentGameId"); // ID en cache
+    const playerId = localStorage.getItem("playerId"); // ID en cache
 
-        connectSocket(
-            gameId,
-            (players) => this.setState({ players }),
-            () => this.setState({ gameStarted: true })
-        );
-    }
+    /** Carga inicial del tablero desde el backend */
+    const fetchBoard = useCallback(async () => {
+        try {
+            const data = await getBoard(gameId);
+            const parsed = parseBoard(data);
+            setBoard(parsed);
 
-    componentWillUnmount() {
-        disconnectSocket();
-    }
+            const foundPlayers = parsed.cells
+                .filter(c => c.item && c.item.type === "PLAYER")
+                .map(p => ({
+                    id: p.item.id,
+                    name: p.item.name,
+                    health: p.item.health,
+                    avatar: "/resources/DinoTRex.png",
+                    position: { row: p.y, col: p.x },
+                }));
 
-    handleMove = (dir) => {
-        sendMove(this.props.gameId, this.props.playerId, dir);
-    };
+            const foundFoods = parsed.cells
+                .filter(c => c.item && c.item.type === "FOOD")
+                .map(f => ({
+                    id: f.item.id,
+                    position: { row: f.y, col: f.x },
+                }));
 
-    handleStopGame = () => {
-        stopGame(this.props.gameId);
-    };
+            setPlayers(foundPlayers);
+            setFoods(foundFoods);
+        } catch (error) {
+            console.error("Error loading board", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [gameId]);
 
-    render() {
-        const { players, gameStarted } = this.state;
+    useEffect(() => {
+        fetchBoard();
+    }, [fetchBoard]);
 
-        if (!gameStarted) return <div>Esperando a que el juego comience...</div>;
+    /** Manejo de teclas W, A, S, D, E para movimiento o acción */
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            const key = event.key.toLowerCase();
+            const directionMap = {
+                w: "UP",
+                a: "LEFT",
+                s: "DOWN",
+                d: "RIGHT",
+                e: "ACTION",
+            };
+            if (directionMap[key]) {
+                sendMove(playerId, directionMap[key], gameId);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [playerId, gameId]);
 
-        return (
-            <div>
-                <h2>Board del juego {this.props.gameId}</h2>
+    /** Conexión al socket para recibir actualizaciones en tiempo real */
+    useEffect(() => {
+        connectSocket(gameId, (updatedPlayersMap) => {
+            const updatedPlayers = Object.values(updatedPlayersMap).map((p) => ({
+                id: p.id,
+                name: p.name,
+                health: p.health,
+                avatar: "/resources/DinoTRex.png",
+                position: { row: p.positionY ?? p.position?.row, col: p.positionX ?? p.position?.col },
+            }));
+            setPlayers(updatedPlayers);
+        }, [gameId]);
 
-                <div>
-                    <button onClick={() => this.handleMove("UP")}>UP</button>
-                    <button onClick={() => this.handleMove("DOWN")}>DOWN</button>
-                    <button onClick={() => this.handleMove("LEFT")}>LEFT</button>
-                    <button onClick={() => this.handleMove("RIGHT")}>RIGHT</button>
-                </div>
+        // Inicia el bucle del juego 1s después de conectar
+        const timer = setTimeout(() => {
+            startGame(gameId);
+        });
 
-                <button onClick={this.handleStopGame}>Stop Game</button>
+        return () => {
+            clearTimeout(timer);
+            stopGame(gameId); // Detiene el bucle si el jugador abandona
+        };
+    }, [gameId]);
 
-                <h3>Jugadores:</h3>
-                <ul>
-                    {players.map((p) => (
-                        <li key={p.id}>
-                            {p.name} - HP: {p.health} - {p.isAlive ? "Vivo" : "Muerto"}
-                        </li>
-                    ))}
-                </ul>
+    if (loading) return <p>Loading...</p>;
+    if (!board) return <p>The board could not be loaded.</p>;
+
+    return (
+        <div className="game-layout">
+            {/* Panel lateral con lista de jugadores y botón de poder */}
+            <div className="sidebar">
+                <PlayerList players={players} />
+                <button className="image-button">
+                    <Power />
+                </button>
             </div>
-        );
-    }
+
+            {/* Tablero principal */}
+            <div className="board">
+                {Array.from({ length: board.height }).map((_, rowIndex) => (
+                    <div key={`row-${rowIndex}`} className="board-row">
+                        {Array.from({ length: board.width }).map((_, colIndex) => {
+                            const tileKey = rowIndex * board.width + colIndex;
+                            const playerHere = players.find(
+                                (p) => p.position.row === rowIndex && p.position.col === colIndex
+                            );
+                            const foodHere = foods.find(
+                                (f) => f.position.row === rowIndex && f.position.col === colIndex
+                            );
+                            return (
+                                <Tile key={`tile-${tileKey}`} size="6vw">
+                                    {foodHere && <Food />}
+                                    {playerHere && (
+                                        <img src={playerHere.avatar} alt={playerHere.name} className="player-on-tile" />
+                                    )}
+                                </Tile>
+                            );
+                        })}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 }
+
+export default Board;
