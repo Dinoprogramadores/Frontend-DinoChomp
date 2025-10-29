@@ -12,8 +12,9 @@ function CreateGame() {
     const [time, setTime] = useState(3);
     const [foodCount, setFoodCount] = useState(1);
     const [powers, setPowers] = useState([]);
-    const [width, setWidth] = useState(5);
-    const [height, setHeight] = useState(5);
+
+    const width = 10;
+    const height = 6;
 
     const togglePower = (power) => {
         setPowers((prev) =>
@@ -36,13 +37,13 @@ function CreateGame() {
             isActive: true,
             playerDinosaurMap: {},
             powers: powers.map((p) => p.toUpperCase()),
-            width: Number(width),
-            height: Number(height),
+            width,
+            height,
             totalFood: Number(foodCount),
             metadata: {
                 foodCount: Number(foodCount),
-                boardWidth: Number(width),
-                boardHeight: Number(height),
+                boardWidth: width,
+                boardHeight: height,
             },
             durationMinutes: Number(time),
         };
@@ -117,29 +118,9 @@ function CreateGame() {
                         </div>
                     </fieldset>
 
-                    <div className="board-size">
-                        <label>
-                            Width
-                            <select value={width} onChange={(e) => setWidth(e.target.value)}>
-                                {Array.from({ length: 6 }, (_, i) => 5 + i).map((n) => (
-                                    <option key={n} value={n}>
-                                        {n}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-
-                        <label>
-                            Height
-                            <select value={height} onChange={(e) => setHeight(e.target.value)}>
-                                {Array.from({ length: 6 }, (_, i) => 5 + i).map((n) => (
-                                    <option key={n} value={n}>
-                                        {n}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-                    </div>
+                    <p className="board-size-fixed">
+                        Board Size: {width} × {height}
+                    </p>
 
                     <div className="form-actions">
                         <button

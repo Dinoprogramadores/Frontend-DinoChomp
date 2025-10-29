@@ -2,6 +2,9 @@ import API_CONFIG from "../config/config.js";
 
 const BASE_URL = `${API_CONFIG.BASE_URL}/games`;
 
+/**
+ * Crea un nuevo juego
+ */
 export async function createGame(gameData) {
     const response = await fetch(BASE_URL, {
         method: "POST",
@@ -19,6 +22,9 @@ export async function createGame(gameData) {
     return await response.json();
 }
 
+/**
+ * Agrega un dinosaurio a un jugador en un juego específico
+ */
 export const addPlayerDinosaur = async (gameId, playerId, dinosaurData) => {
     const response = await fetch(`${BASE_URL}/${gameId}/players/${playerId}`, {
         method: "POST",
@@ -27,12 +33,16 @@ export const addPlayerDinosaur = async (gameId, playerId, dinosaurData) => {
     });
 
     if (!response.ok) {
-        throw new Error("Failed to add player dinosaur");
+        const errorText = await response.text();
+        throw new Error(`Failed to add player dinosaur: ${response.status} - ${errorText}`);
     }
 
-    return response.json();
+    return await response.json();
 };
 
+/**
+ * Obtiene el ID del tablero asociado a un juego
+ */
 export const getBoardIdByGame = async (gameId) => {
     const response = await fetch(`${BASE_URL}/${gameId}/board`);
 
@@ -45,6 +55,9 @@ export const getBoardIdByGame = async (gameId) => {
     return data.boardId;
 };
 
+/**
+ * Obtiene los datos de un juego
+ */
 export const getGameData = async (gameId) => {
     const response = await fetch(`${BASE_URL}/${gameId}`);
 
@@ -56,6 +69,9 @@ export const getGameData = async (gameId) => {
     return await response.json();
 };
 
+/**
+ * Calcula y obtiene el ganador de un juego
+ */
 export const getWinner = async (gameId) => {
     const response = await fetch(`${BASE_URL}/${gameId}/winner/compute`);
 
@@ -66,4 +82,3 @@ export const getWinner = async (gameId) => {
 
     return await response.json();
 };
-
