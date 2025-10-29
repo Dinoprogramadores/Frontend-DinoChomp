@@ -8,6 +8,7 @@ import { parseBoard } from "./parseBoard.js";
 import { getBoard } from "../../services/BoardService.js";
 import { connectSocket, sendMove, startGame, stopGame } from "../../services/Socket.js";
 import {getBoardIdByGame, getGameData} from "../../services/GameService.js";
+import Timer from "../../components/game/Timer.jsx";
 
 function Board() {
     const [board, setBoard] = useState(null);
@@ -129,6 +130,7 @@ function Board() {
         <div className="game-layout">
             {/* Panel lateral con lista de jugadores y botón de poder */}
             <div className="sidebar">
+                <Timer durationMinutes={durationMinutes} gameId={gameId} />
                 <PlayerList players={players} />
 
                 {showPowerButton && (
