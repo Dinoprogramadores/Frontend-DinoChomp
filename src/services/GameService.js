@@ -44,3 +44,26 @@ export const getBoardIdByGame = async (gameId) => {
     const data = await response.json();
     return data.boardId;
 };
+
+export const getGameData = async (gameId) => {
+    const response = await fetch(`${BASE_URL}/${gameId}`);
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error fetching game data: ${response.status} - ${errorText}`);
+    }
+
+    return await response.json();
+};
+
+export const getWinner = async (gameId) => {
+    const response = await fetch(`${BASE_URL}/${gameId}/winner/compute`);
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error fetching winner: ${response.status} - ${errorText}`);
+    }
+
+    return await response.json();
+};
+

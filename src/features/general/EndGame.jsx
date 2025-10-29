@@ -1,22 +1,39 @@
-import React, { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getWinner } from "../../services/GameService";
 import "../../styles/game/EndGame.css";
 
 function EndGame() {
     const navigate = useNavigate();
-    const location = useLocation();
-
-    const { winnerName, winnerAvatar } = location.state || {
-        winnerName: "Unknown", //TODO Traer jugador ganador
-        winnerAvatar: "/resources/DinoTRex.png"
-    };
+    const [winnerName, setWinnerName] = useState("Determining winner...");
+    const winnerAvatar = "/resources/DinoTRex.png"; // Avatar por defecto
 
     useEffect(() => {
-        localStorage.removeItem("currentGameId");
-        localStorage.removeItem("selectedDinoName");
-        localStorage.removeItem("playerId");
-        localStorage.removeItem("playerName");
-        sessionStorage.clear();
+        const fetchWinner = async () => {
+            const gameId = localStorage.getItem("currentGameId");
+            if (gameId) {
+                try {
+                    const winnerData = await getWinner(gameId);
+                    setWinnerName(winnerData.name);
+                } catch (error) {
+                    console.error("Failed to fetch winner:", error);
+                    setWinnerName("No winner could be determined");
+                }
+            }
+        };
+
+        fetchWinner();
+
+        // Limpiar localStorage después de un breve retraso para asegurar que se obtuvo el gameId
+        const cleanupTimeout = setTimeout(() => {
+            localStorage.removeItem("currentGameId");
+            localStorage.removeItem("selectedDinoName");
+            localStorage.removeItem("playerId");
+            localStorage.removeItem("playerName");
+            sessionStorage.clear();
+        }, 1000);
+
+        return () => clearTimeout(cleanupTimeout);
     }, []);
 
     const handleGoHome = () => {

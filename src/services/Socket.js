@@ -8,7 +8,7 @@ let connected = false;
 /**
  * Conecta el socket al backend usando STOMP + SockJS
  */
-export const connectSocket = (gameId, onPlayerUpdate, playerId) => {
+export const connectSocket = (gameId, onPlayerUpdate, playerId, onTimerUpdate) => {
   // Cerrar cualquier conexión previa
   if (stompClient && stompClient.active) {
     console.log("⚠️ Cerrando conexión previa STOMP...");
@@ -73,6 +73,20 @@ export const connectSocket = (gameId, onPlayerUpdate, playerId) => {
       }
     });
     console.log(`📡 Suscrito al topic: /topic/games/${gameId}/players`);
+
+    // Suscripción a actualizaciones del temporizador (opcional, si el backend las envía)
+    if (onTimerUpdate) {
+      stompClient.subscribe(`/topic/games/${gameId}/timer`, (message) => {
+        try {
+          const timerData = JSON.parse(message.body);
+          console.log("⏱️ Actualización del temporizador:", timerData);
+          onTimerUpdate(timerData);
+        } catch (err) {
+          console.error("❌ Error procesando mensaje del temporizador:", err);
+        }
+      });
+      console.log(`📡 Suscrito al topic: /topic/games/${gameId}/timer`);
+    }
   };
 
   stompClient.onStompError = (frame) => {
@@ -117,3 +131,22 @@ export const stopGame = (gameId) => {
   if (!connected || !stompClient?.connected) return;
   stompClient.publish({ destination: `/app/games/${gameId}/stop` });
 };
+
+/**
+ * Notifica al backend que el temporizador ha iniciado
+ */
+export const sendTimerStart = (gameId) => {
+  if (!connected || !stompClient?.connected) return;
+  stompClient.publish({ destination: `/games/${gameId}/timer/start` });
+  console.log(`▶️ Notificado inicio de timer para el juego ${gameId}`);
+};
+
+/**
+ * Notifica al backend que el temporizador ha terminado
+ */
+export const sendTimerStop = (gameId) => {
+  if (!connected || !stompClient?.connected) return;
+  stompClient.publish({ destination: `/games/${gameId}/timer/stop` });
+  console.log(`⏹️ Notificado fin de timer para el juego ${gameId}`);
+};
+
