@@ -16,21 +16,28 @@ export const connectSocket = (gameId, onPlayerUpdate) => {
     onConnect: () => {
       connected = true;
       console.log(` Conectado al juego ${gameId}`);
-      stompClient.subscribe(`/topic/games/${gameId}/players`, (message) => {
-        const updatedPlayer = JSON.parse(message.body);
-        onPlayerUpdate((prev) => ({
-          ...prev,
-          [updatedPlayer.id]: updatedPlayer,
-        }));
-      });
-    },
-    onStompError: (frame) => {
-      console.error('Error STOMP:', frame);
+        stompClient.subscribe(`/topic/games/${gameId}/players`, (message) => {
+            const updatedPlayer = JSON.parse(message.body);
+            onPlayerUpdate((prev) => {
+                const existing = prev[updatedPlayer.id] || {};
+                return {
+                    ...prev,
+                    [updatedPlayer.id]: {
+                        ...existing,
+                        position: {
+                            row: updatedPlayer.positionY,
+                            col: updatedPlayer.positionX,
+                        },
+                        health: updatedPlayer.health,
+                        isAlive: updatedPlayer.isAlive,
+                    },
+                };
+            });
+
+        });
     },
   });
-  stompClient.activate();
 };
-
 /**
  * Envía movimiento del jugador
  */
