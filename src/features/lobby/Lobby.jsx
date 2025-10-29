@@ -42,17 +42,17 @@ function Lobby() {
                 <h2>Waiting Room</h2>
                 <p className="lobby-game-name">Game: {gameName}</p>
 
-                <div className="player-grid">
+                <div className="lobby-player-grid">
                     {players.map((player, index) => (
-                        <div className="player-card" key={index}>
-                            <img src={player.dinoImage} alt="Dino" className="player-dino-image" />
-                            <div className="player-name">{player.name}</div>
+                        <div className="lobby-player-card" key={index}>
+                            <img src={player.dinoImage} alt="Dino" className="lobby-player-dino-image" />
+                            <div className="lobby-player-name">{player.name}</div>
                         </div>
                     ))}
                     {/* Fill empty spaces up to 4 players */}
                     {Array.from({ length: 4 - players.length }).map((_, index) => (
-                        <div className="player-card empty" key={`empty-${index}`}>
-                            <div className="player-name">Waiting...</div>
+                        <div className="lobby-player-card empty" key={`empty-${index}`}>
+                            <div className="lobby-player-name">Waiting...</div>
                         </div>
                     ))}
                 </div>

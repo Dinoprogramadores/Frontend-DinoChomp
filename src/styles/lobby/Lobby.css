@@ -32,14 +32,14 @@
     color: #ccc;
 }
 
-.player-grid {
+.lobby-player-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
     margin-bottom: 24px;
 }
 
-.player-card {
+.lobby-player-card {
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
@@ -51,19 +51,19 @@
     min-height: 150px;
 }
 
-.player-card.empty {
+.lobby-player-card.empty {
     background: rgba(0, 0, 0, 0.2);
     border-style: dashed;
 }
 
-.player-dino-image {
+.lobby-player-dino-image {
     width: 80px;
     height: 80px;
     margin-bottom: 12px;
     object-fit: contain;
 }
 
-.player-name {
+.lobby-player-name {
     font-weight: bold;
     font-size: 1.1rem;
 }

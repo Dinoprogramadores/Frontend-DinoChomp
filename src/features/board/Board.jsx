@@ -6,12 +6,22 @@ import PlayerList from "../players/PlayerList.jsx";
 import { parseBoard } from "./parseBoard.js";
 import { getBoard } from "../../services/BoardService.js";
 import Power from "../../components/game/Power.jsx";
+import PowerNotification from "../../components/game/PowerNotification.jsx";
 
 function Board() {
     const [board, setBoard] = useState(null);
     const [players, setPlayers] = useState([]);
     const [foods, setFoods] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [powerMessage, setPowerMessage] = useState("");
+    const [showNotification, setShowNotification] = useState(false);
+
+    const showPowerNotification = (powerName) => {
+        setPowerMessage(`You obtained the power ${powerName}!`);
+        setShowNotification(true);
+        setTimeout(() => setShowNotification(false), 2500);
+    };
 
     const fetchBoard = useCallback(async () => {
         try {
@@ -46,6 +56,16 @@ function Board() {
     }, []);
 
     useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key.toLowerCase() === "p") {
+                showPowerNotification("Healing");
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, []);
+
+    useEffect(() => {
         fetchBoard();
     }, [fetchBoard]);
 
@@ -67,19 +87,20 @@ function Board() {
 
     return (
         <div className="game-layout">
+
             <div className="sidebar">
                 <PlayerList players={players} />
-
                 <button className="image-button">
                     <Power />
                 </button>
             </div>
+            <div className="board" style={{ position: "relative" }}>
+                <PowerNotification message={powerMessage} visible={showNotification} />
 
-            <div className="board">
                 {Array.from({ length: board.height }).map((_, rowIndex) => (
                     <div key={`row-${rowIndex}`} className="board-row">
                         {Array.from({ length: board.width }).map((_, colIndex) => {
-                            const tileKey = rowIndex * board.width + colIndex; // ✅ clave estable
+                            const tileKey = rowIndex * board.width + colIndex;
                             const playerHere = players.find(
                                 (p) => p.position.row === rowIndex && p.position.col === colIndex
                             );
