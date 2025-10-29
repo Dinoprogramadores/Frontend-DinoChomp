@@ -25,7 +25,8 @@ function Board() {
 
     const fetchBoard = useCallback(async () => {
         try {
-            const data = await getBoard("69005f3aac5bfb027fff2528"); // TODO: cambiar luego
+            const boardId = localStorage.getItem("currentBoardId");
+            const data = await getBoard(boardId);
             const parsed = parseBoard(data);
             setBoard(parsed);
 

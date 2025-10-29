@@ -36,6 +36,9 @@ function CreateGame() {
             isActive: true,
             playerDinosaurMap: {},
             powers: powers.map((p) => p.toUpperCase()),
+            width: Number(width),
+            height: Number(height),
+            totalFood: Number(foodCount),
             metadata: {
                 foodCount: Number(foodCount),
                 boardWidth: Number(width),
@@ -48,6 +51,7 @@ function CreateGame() {
             const created = await createGame(payload);
             console.log("Game created:", created);
             localStorage.setItem("currentGameId", name.trim());
+            localStorage.setItem("currentBoardId", created.boardId);
             navigate("/select-dino");
         } catch (error) {
             console.error("Error creating game:", error);

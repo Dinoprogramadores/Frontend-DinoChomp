@@ -8,7 +8,7 @@ function Lobby() {
     const location = useLocation();
 
     // Data received from the previous screen
-    const gameName = location.state?.gameName;
+    const gameName = localStorage.getItem("currentGameId");
     const myDino = location.state?.dino;
     const myPlayerName = "Waldron63"; // Current player's name
 
@@ -33,7 +33,7 @@ function Lobby() {
     const handleStart = () => {
         // Logic to start the game (future implementation)
         console.log("Starting the game...");
-        navigate("/board", { state: { gameName } });
+        navigate("/game-board", { state: { gameName } });
     };
 
     return (
