@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../styles/SelectGame.css";
+import "../../styles/game/SelectGame.css";
 import DinoLogo2 from "../../../public/resources/DinoLogo2.png";
 import DinoNombre from "../../../public/resources/DinoName.png";
 import JoinGame from "../../components/manage/JoinGame.jsx";
@@ -10,13 +10,11 @@ function SelectGame() {
     const [showJoin, setShowJoin] = useState(false);
 
     const handleJoin = () => {
-        // Show popup to enter the game name
         setShowJoin(true);
     };
 
     const handleCreate = () => {
-        // Navigate to the game creation screen
-        navigate("/create");
+        navigate("/create-game");
     };
 
     return (
@@ -25,8 +23,8 @@ function SelectGame() {
             <img src={DinoLogo2} alt="Dinochomp Logo" className="select-logo" />
 
             <div className="select-panel">
-                <button className="select-button" onClick={handleJoin}>Join</button>
-                <button className="select-button" onClick={handleCreate}>Create</button>
+                <button className="select-button" onClick={handleJoin}>JOIN</button>
+                <button className="select-button" onClick={handleCreate}>CREATE</button>
             </div>
 
             {showJoin && <JoinGame onClose={() => setShowJoin(false)} />}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import "../../styles/Lobby.css";
+import "../../styles/lobby/Lobby.css";
 import DinoLogo2 from "../../../public/resources/DinoTRex.png";
 
 function Lobby() {

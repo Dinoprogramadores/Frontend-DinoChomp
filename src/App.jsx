@@ -4,7 +4,7 @@ import Board from "./features/board/Board.jsx";
 import SelectGame from "./features/manage/SelectGame.jsx";
 import CreateGame from "./features/manage/CreateGame.jsx";
 import SelectDino from "./features/manage/SelectDino.jsx";
-import Lobby from "./features/board/Lobby.jsx";
+import Lobby from "./features/lobby/Lobby.jsx";
 
 import './styles/App.css'
 
@@ -13,10 +13,10 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/select" element={<SelectGame />} />
-        <Route path="/create" element={<CreateGame />} />
+        <Route path="/select-game" element={<SelectGame />} />
+        <Route path="/create-game" element={<CreateGame />} />
         <Route path="/select-dino" element={<SelectDino />} />
-        <Route path="/board" element={<Board />} />
+        <Route path="/game-board" element={<Board />} />
         <Route path="/lobby" element={<Lobby />} />
       </Routes>
     </Router>

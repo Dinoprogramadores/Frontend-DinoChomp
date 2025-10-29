@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../styles/JoinGame.css";
+import "../../styles/game/JoinGame.css";
 
 // Modal component for joining a game
 // Props: onClose() -> closes the modal

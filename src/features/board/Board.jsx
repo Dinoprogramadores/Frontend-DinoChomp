@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
-import "../../styles/Board.css";
+import "../../styles/board/Board.css";
 import Tile from "../../components/game/Tile.jsx";
 import Food from "../../components/game/Food.jsx";
 import PlayerList from "../players/PlayerList.jsx";
 import { parseBoard } from "./parseBoard.js";
-import { getBoard } from "../../services/CommonService.js";
+import { getBoard } from "../../services/BoardService.js";
 import Power from "../../components/game/Power.jsx";
 
 function Board() {

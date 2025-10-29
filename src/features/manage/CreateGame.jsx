@@ -1,15 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../styles/CreateGame.css";
+import "../../styles/game/CreateGame.css";
+import { createGame } from "../../services/GameService.js";
 
-const AVAILABLE_POWERS = [
-    "Speed",
-    "Shield",
-    "DoubleFood",
-    "Invisibility",
-    "Magnet",
-    "Teleport",
-];
+const AVAILABLE_POWERS = ["Healing"];
 
 function CreateGame() {
     const navigate = useNavigate();
@@ -23,38 +17,48 @@ function CreateGame() {
 
     const togglePower = (power) => {
         setPowers((prev) =>
-            prev.includes(power) ? prev.filter((p) => p !== power) : [...prev, power]
+            prev.includes(power)
+                ? prev.filter((p) => p !== power)
+                : [...prev, power]
         );
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Simple validations
         if (!name.trim()) {
             alert("Game name is required");
             return;
         }
 
         const payload = {
-            name: name.trim(),
-            time: Number(time),
-            foodCount: Number(foodCount),
-            powers,
-            board: { width: Number(width), height: Number(height) },
+            nombre: name.trim(),
+            isActive: true,
+            playerDinosaurMap: {},
+            powers: powers.map((p) => p.toUpperCase()),
+            metadata: {
+                foodCount: Number(foodCount),
+                boardWidth: Number(width),
+                boardHeight: Number(height),
+            },
+            durationMinutes: Number(time),
         };
 
-        console.log("Create game with:", payload);
-
-        // For now, redirect to /select-dino to choose a dino.
-        navigate("/select-dino", { state: { gameName: payload.name } });
+        try {
+            const created = await createGame(payload);
+            console.log("Game created:", created);
+            localStorage.setItem("currentGameId", name.trim());
+            navigate("/select-dino");
+        } catch (error) {
+            console.error("Error creating game:", error);
+            alert("Error creating game. Check the console for details.");
+        }
     };
 
     return (
         <div className="create-container">
             <div className="create-panel">
                 <h2>Create Game</h2>
-
                 <form className="create-form" onSubmit={handleSubmit}>
                     <label>
                         Game Name
@@ -72,22 +76,29 @@ function CreateGame() {
                         Game Duration (minutes)
                         <select value={time} onChange={(e) => setTime(e.target.value)}>
                             {Array.from({ length: 8 }, (_, i) => 3 + i).map((m) => (
-                                <option key={m} value={m}>{m}</option>
+                                <option key={m} value={m}>
+                                    {m}
+                                </option>
                             ))}
                         </select>
                     </label>
 
                     <label>
                         Food Quantity
-                        <select value={foodCount} onChange={(e) => setFoodCount(e.target.value)}>
+                        <select
+                            value={foodCount}
+                            onChange={(e) => setFoodCount(e.target.value)}
+                        >
                             {Array.from({ length: 8 }, (_, i) => 1 + i).map((c) => (
-                                <option key={c} value={c}>{c}</option>
+                                <option key={c} value={c}>
+                                    {c}
+                                </option>
                             ))}
                         </select>
                     </label>
 
                     <fieldset className="powers-field">
-                        <legend>Select Powers (you can select multiple)</legend>
+                        <legend>Select Powers</legend>
                         <div className="powers-list">
                             {AVAILABLE_POWERS.map((p) => (
                                 <label key={p} className="power-item">
@@ -107,7 +118,9 @@ function CreateGame() {
                             Width
                             <select value={width} onChange={(e) => setWidth(e.target.value)}>
                                 {Array.from({ length: 6 }, (_, i) => 5 + i).map((n) => (
-                                    <option key={n} value={n}>{n}</option>
+                                    <option key={n} value={n}>
+                                        {n}
+                                    </option>
                                 ))}
                             </select>
                         </label>
@@ -116,15 +129,25 @@ function CreateGame() {
                             Height
                             <select value={height} onChange={(e) => setHeight(e.target.value)}>
                                 {Array.from({ length: 6 }, (_, i) => 5 + i).map((n) => (
-                                    <option key={n} value={n}>{n}</option>
+                                    <option key={n} value={n}>
+                                        {n}
+                                    </option>
                                 ))}
                             </select>
                         </label>
                     </div>
 
                     <div className="form-actions">
-                        <button type="button" className="create-cancel" onClick={() => navigate(-1)}>Cancel</button>
-                        <button type="submit" className="create-submit">Create</button>
+                        <button
+                            type="button"
+                            className="create-cancel"
+                            onClick={() => navigate(-1)}
+                        >
+                            Cancel
+                        </button>
+                        <button type="submit" className="create-submit">
+                            Create
+                        </button>
                     </div>
                 </form>
             </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import PlayerCard from "./PlayerCard.jsx";
-import "../../styles/Player.css";
+import "../../styles/board/Player.css";
 
 function PlayerList({ players }) {
     return (
