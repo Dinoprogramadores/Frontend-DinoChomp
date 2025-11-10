@@ -34,6 +34,7 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId, o
                     const existingIndex = prevPlayers.findIndex(p => p.id === updatedPlayer.id);
                     const updated = {
                         id: updatedPlayer.id,
+                        name: updatedPlayer.name,
                         health: updatedPlayer.health,
                         isAlive: updatedPlayer.isAlive,
                         position: { row: updatedPlayer.positionY, col: updatedPlayer.positionX },
@@ -51,7 +52,7 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId, o
                 console.error("Error procesando mensaje:", err);
             }
         });
-        console.log(`📡 Suscrito al topic: /topic/games/${gameId}/players`);
+        console.log(`Suscrito al topic: /topic/games/${gameId}/players`);
 
         stompClient.subscribe(`/topic/games/${gameId}/food`, (message) => {
             try {
@@ -79,7 +80,7 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId, o
                 console.error("Error procesando powerEvent:", err);
             }
         });
-        console.log(`⚡ Suscrito al topic: /topic/games/${gameId}/power`);
+        console.log(`Suscrito al topic: /topic/games/${gameId}/power`);
 
         setTimeout(() => {
             if (stompClient && stompClient.connected) {
@@ -88,6 +89,7 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId, o
                     body: JSON.stringify({
                         type: "PLAYER",
                         id: Array.isArray(playerId) ? playerId[0] : playerId,
+                        name: localStorage.getItem("playerName") || "Jugador",
                         positionX: 0,
                         positionY: 0,
                         health: 100,
@@ -148,7 +150,7 @@ export const stopGame = (gameId) => {
 export const sendTimerStart = (gameId) => {
   if (!connected || !stompClient?.connected) return;
   stompClient.publish({ destination: `/games/${gameId}/timer/start` });
-  console.log(`▶️ Notificado inicio de timer para el juego ${gameId}`);
+  console.log(`Notificado inicio de timer para el juego ${gameId}`);
 };
 
 /**
@@ -157,6 +159,6 @@ export const sendTimerStart = (gameId) => {
 export const sendTimerStop = (gameId) => {
   if (!connected || !stompClient?.connected) return;
   stompClient.publish({ destination: `/games/${gameId}/timer/stop` });
-  console.log(`⏹️ Notificado fin de timer para el juego ${gameId}`);
+  console.log(`Notificado fin de timer para el juego ${gameId}`);
 };
 
