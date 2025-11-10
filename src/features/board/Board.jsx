@@ -110,7 +110,21 @@ function Board() {
                     setPowerStatus("USED");
                 }
             },
-            playerId
+            playerId,
+            (foodEvent) => {
+                if (foodEvent.action === "FOOD_REMOVED") {
+                    setFoods((prevFoods) => prevFoods.filter(f => f.id !== foodEvent.id));
+                } else if (foodEvent.action === "FOOD_ADDED") {
+                    // En caso de que luego quieras regenerar comida automáticamente
+                    setFoods((prevFoods) => [
+                        ...prevFoods,
+                        {
+                            id: foodEvent.id,
+                            position: { row: foodEvent.y, col: foodEvent.x },
+                        },
+                    ]);
+                }
+            }
         );
 
         const timer = setTimeout(() => startGame(gameId), 1000);

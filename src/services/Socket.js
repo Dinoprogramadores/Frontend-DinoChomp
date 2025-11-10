@@ -8,31 +8,27 @@ let connected = false;
 /**
  * Conecta el socket al backend usando STOMP + SockJS
  */
-export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId) => {
-    // Cerrar conexión previa si existe
+export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId, onFoodUpdate) => {
     if (stompClient && stompClient.active) {
-        console.log("⚠️ Cerrando conexión previa STOMP...");
+        console.log("Cerrando conexión previa STOMP...");
         stompClient.deactivate();
         connected = false;
     }
 
-    // Crear nuevo cliente STOMP
     stompClient = new Client({
         webSocketFactory: () => new SockJS(`${API_CONFIG.BASE_URL}/ws`),
         reconnectDelay: 5000,
         debug: (str) => console.log("[STOMP]", str),
     });
 
-    // Cuando se conecta correctamente
     stompClient.onConnect = () => {
         connected = true;
-        console.log(`✅ Conectado al juego ${gameId}`);
+        console.log(`Conectado al juego ${gameId}`);
 
-        // 👉 Suscribirse a actualizaciones de jugadores
         stompClient.subscribe(`/topic/games/${gameId}/players`, (message) => {
             try {
                 const updatedPlayer = JSON.parse(message.body);
-                console.log("📡 Movimiento recibido:", updatedPlayer);
+                console.log("Movimiento recibido:", updatedPlayer);
 
                 onPlayerUpdate((prevPlayers) => {
                     const existingIndex = prevPlayers.findIndex(p => p.id === updatedPlayer.id);
@@ -52,12 +48,25 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId) =
                     }
                 });
             } catch (err) {
-                console.error("❌ Error procesando mensaje:", err);
+                console.error("Error procesando mensaje:", err);
             }
         });
         console.log(`📡 Suscrito al topic: /topic/games/${gameId}/players`);
 
-        // 👉 Suscribirse al topic de poderes
+        stompClient.subscribe(`/topic/games/${gameId}/food`, (message) => {
+            try {
+                const foodEvent = JSON.parse(message.body);
+                console.log("Evento de comida recibido:", foodEvent);
+
+                if (onFoodUpdate) {
+                    onFoodUpdate(foodEvent);
+                }
+            } catch (err) {
+                console.error("Error procesando foodEvent:", err);
+            }
+        });
+        console.log(`Suscrito al topic: /topic/games/${gameId}/food`);
+
         stompClient.subscribe(`/topic/games/${gameId}/power`, (message) => {
             try {
                 const powerEvent = JSON.parse(message.body);
@@ -67,12 +76,11 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId) =
                     onPowerUpdate(powerEvent);
                 }
             } catch (err) {
-                console.error("❌ Error procesando powerEvent:", err);
+                console.error("Error procesando powerEvent:", err);
             }
         });
         console.log(`⚡ Suscrito al topic: /topic/games/${gameId}/power`);
 
-        // 👉 Publicar evento "join" (cuando el jugador entra al juego)
         setTimeout(() => {
             if (stompClient && stompClient.connected) {
                 stompClient.publish({
@@ -86,18 +94,18 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId) =
                         alive: true,
                     }),
                 });
-                console.log(`🙋‍♂️ Jugador ${playerId} se unió al juego ${gameId}`);
+                console.log(`Jugador ${playerId} se unió al juego ${gameId}`);
             }
         }, 300);
     };
 
     stompClient.onStompError = (frame) => {
-        console.error("❌ Error STOMP:", frame.headers["message"]);
+        console.error("Error STOMP:", frame.headers["message"]);
         console.error("Detalles:", frame.body);
     };
 
     stompClient.onWebSocketError = (err) => {
-        console.error("❌ Error WebSocket:", err);
+        console.error("Error WebSocket:", err);
     };
 
     stompClient.activate();
@@ -108,7 +116,7 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId) =
  */
 export const sendMove = (playerId, direction, gameId) => {
     if (!connected || !stompClient?.connected) {
-        console.warn("⚠️ No conectado al socket, ignorando movimiento.");
+        console.warn("No conectado al socket, ignorando movimiento.");
         return;
     }
 
