@@ -15,7 +15,7 @@ function Board() {
     const [players, setPlayers] = useState([]);
     const [foods, setFoods] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [powerStatus, setPowerStatus] = useState(null); // 👈 nuevo estado del poder
+    const [powerStatus, setPowerStatus] = useState(null);
 
     const gameId = localStorage.getItem("currentGameId");
     const playerId = localStorage.getItem("playerId");
@@ -32,11 +32,10 @@ function Board() {
             const parsed = parseBoard(data);
             setBoard(parsed);
 
-      // Obtener datos del juego incluida la duración
       const gameData = await getGameData(gameId);
       if (gameData.durationMinutes) {
         setDurationMinutes(gameData.durationMinutes);
-        console.log(`⏱️ Duración del juego: ${gameData.durationMinutes} minutos`);
+        console.log(`Duración del juego: ${gameData.durationMinutes} minutos`);
       }
 
       const foundPlayers = parsed.cells
@@ -97,11 +96,11 @@ function Board() {
         connectSocket(
             gameId,
             (updatedPlayers) => {
-                console.log("📡 Actualización de jugadores:", updatedPlayers);
+                console.log("Actualización de jugadores:", updatedPlayers);
                 setPlayers(updatedPlayers);
             },
             (powerEvent) => {
-                console.log("⚡ Evento de poder recibido:", powerEvent);
+                console.log("Evento de poder recibido:", powerEvent);
                 if (powerEvent.status === "AVAILABLE") {
                     setPowerStatus("AVAILABLE");
                 } else if (powerEvent.status === "CLAIMED") {
@@ -110,7 +109,21 @@ function Board() {
                     setPowerStatus("USED");
                 }
             },
-            playerId
+            playerId,
+            (foodEvent) => {
+                if (foodEvent.action === "FOOD_REMOVED") {
+                    setFoods((prevFoods) => prevFoods.filter(f => f.id !== foodEvent.id));
+                } else if (foodEvent.action === "FOOD_ADDED") {
+                    // En caso de luego regenerar comida automáticamente
+                    setFoods((prevFoods) => [
+                        ...prevFoods,
+                        {
+                            id: foodEvent.id,
+                            position: { row: foodEvent.y, col: foodEvent.x },
+                        },
+                    ]);
+                }
+            }
         );
 
         const timer = setTimeout(() => startGame(gameId), 1000);
