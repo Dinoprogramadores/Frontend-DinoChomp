@@ -112,7 +112,10 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId, o
 
     stompClient.activate();
 };
-
+/**
+ * Acceder al stomp client desde otros componentes
+ */
+export const getStompClient = () => stompClient;
 /**
  * Envía un movimiento del jugador
  */

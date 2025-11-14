@@ -9,6 +9,7 @@ import { getBoard } from "../../services/BoardService.js";
 import { connectSocket, sendMove, startGame, stopGame } from "../../services/Socket.js";
 import {getBoardIdByGame, getGameData} from "../../services/GameService.js";
 import Timer from "../../components/game/Timer.jsx";
+import { getStompClient } from '../../services/Socket.js';
 
 function Board() {
     const [board, setBoard] = useState(null);
@@ -19,6 +20,7 @@ function Board() {
 
     const gameId = localStorage.getItem("currentGameId");
     const playerId = localStorage.getItem("playerId");
+    
 
   const [durationMinutes, setDurationMinutes] = useState(null);
 
@@ -100,6 +102,7 @@ function Board() {
                 setPlayers(updatedPlayers);
             },
             (powerEvent) => {
+                handlePowerUpdate
                 console.log("Evento de poder recibido:", powerEvent);
                 if (powerEvent.status === "AVAILABLE") {
                     setPowerStatus("AVAILABLE");
@@ -138,6 +141,10 @@ function Board() {
     if (!board) return <p>The board could not be loaded.</p>;
 
     const showPowerButton = powerStatus === "AVAILABLE";
+    // callback para actualizar el estado del poder
+    const handlePowerUpdate = (powerEvent) => {
+        setPowerStatus(powerEvent.status);
+    };
 
     return (
         <div className="game-layout">
@@ -150,9 +157,10 @@ function Board() {
                     <button
                         className="image-button"
                         onClick={() => {
+                            const stompClient = getStompClient();
+                            if (!stompClient) return;
                             console.log("⚡ Power button clicked");
-                            // Aquí puedes publicar el evento al backend:
-                            // stompClient.publish({ destination: `/app/games/${gameId}/claim-power`, body: playerId });
+                            stompClient.publish({ destination: `/app/games/${gameId}/power/claim`, body: JSON.stringify({ gameId, playerId }),});
                         }}
                     >
                         <Power />
