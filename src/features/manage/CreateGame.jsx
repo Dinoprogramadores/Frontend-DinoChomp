@@ -53,6 +53,7 @@ function CreateGame() {
             console.log("Game created:", created);
             localStorage.setItem("currentGameId", name.trim());
             localStorage.setItem("currentBoardId", created.boardId);
+            localStorage.setItem("gamePowers", JSON.stringify(powers.map((p) => p.toUpperCase())));
             navigate("/select-dino");
         } catch (error) {
             console.error("Error creating game:", error);

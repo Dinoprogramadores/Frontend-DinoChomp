@@ -20,6 +20,8 @@ function Board() {
 
     const gameId = localStorage.getItem("currentGameId");
     const playerId = localStorage.getItem("playerId");
+    const enabledPowers = JSON.parse(localStorage.getItem("gamePowers") || "[]");
+
     
 
   const [durationMinutes, setDurationMinutes] = useState(null);
@@ -140,12 +142,17 @@ function Board() {
     if (loading) return <p>Loading...</p>;
     if (!board) return <p>The board could not be loaded.</p>;
 
-    const showPowerButton = powerStatus === "AVAILABLE";
+    const currentPlayer = players.find(p => p.id === playerId);
+    const isPlayerAlive = currentPlayer && currentPlayer.health > 0;
+
+    const showPowerButton =  powerStatus === "AVAILABLE" &&
+    isPlayerAlive &&
+    enabledPowers.length > 0;
     // callback para actualizar el estado del poder
     const handlePowerUpdate = (powerEvent) => {
         setPowerStatus(powerEvent.status);
     };
-
+   
     return (
         <div className="game-layout">
             {/* Panel lateral con lista de jugadores y botón de poder */}
