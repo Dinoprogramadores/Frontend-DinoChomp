@@ -66,6 +66,11 @@ function Board() {
     }
   }, [gameId]);
 
+    // callback para actualizar el estado del poder
+    const handlePowerUpdate = (powerEvent) => {
+        setPowerStatus(powerEvent.status);
+    };
+
   useEffect(() => {
     fetchBoard();
   }, [fetchBoard]);
@@ -172,10 +177,6 @@ function Board() {
     const showPowerButton =  powerStatus === "AVAILABLE" &&
     isPlayerAlive &&
     enabledPowers.length > 0;
-    // callback para actualizar el estado del poder
-    const handlePowerUpdate = (powerEvent) => {
-        setPowerStatus(powerEvent.status);
-    };
    
     return (
         <div className="game-layout">
