@@ -53,6 +53,7 @@ function CreateGame() {
             console.log("Game created:", created);
             localStorage.setItem("currentGameId", name.trim());
             localStorage.setItem("currentBoardId", created.boardId);
+            localStorage.setItem("gamePowers", JSON.stringify(powers.map((p) => p.toUpperCase())));
             navigate("/select-dino");
         } catch (error) {
             console.error("Error creating game:", error);
@@ -79,13 +80,16 @@ function CreateGame() {
 
                     <label>
                         Game Duration (minutes)
-                        <select value={time} onChange={(e) => setTime(e.target.value)}>
-                            {Array.from({ length: 8 }, (_, i) => 3 + i).map((m) => (
-                                <option key={m} value={m}>
-                                    {m}
-                                </option>
-                            ))}
-                        </select>
+                        <input
+                            type="number"
+                            value={time}
+                            min={1}
+                            max={999}
+                            step={1}
+                            onChange={(e) => setTime(e.target.value)}
+                            placeholder="Minutes"
+                            required
+                        />
                     </label>
 
                     <label>

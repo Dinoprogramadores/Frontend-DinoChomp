@@ -9,18 +9,20 @@ import { getBoard } from "../../services/BoardService.js";
 import { connectSocket, sendMove, startGame, stopGame } from "../../services/Socket.js";
 import {getBoardIdByGame, getGameData} from "../../services/GameService.js";
 import Timer from "../../components/game/Timer.jsx";
+import { getStompClient } from '../../services/Socket.js';
+import { useNavigate } from "react-router-dom";
 
 function Board() {
+    const navigate = useNavigate();
     const [board, setBoard] = useState(null);
     const [players, setPlayers] = useState([]);
     const [foods, setFoods] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [powerStatus, setPowerStatus] = useState(null); // 👈 nuevo estado del poder
-
+    const [powerStatus, setPowerStatus] = useState(null);
     const gameId = localStorage.getItem("currentGameId");
     const playerId = localStorage.getItem("playerId");
-
-  const [durationMinutes, setDurationMinutes] = useState(null);
+    const enabledPowers = JSON.parse(localStorage.getItem("gamePowers") || "[]");
+    const [durationMinutes, setDurationMinutes] = useState(null);
 
     /**
      * Carga inicial del tablero desde el backend (estado base del juego)
@@ -32,11 +34,10 @@ function Board() {
             const parsed = parseBoard(data);
             setBoard(parsed);
 
-      // Obtener datos del juego incluida la duración
       const gameData = await getGameData(gameId);
       if (gameData.durationMinutes) {
         setDurationMinutes(gameData.durationMinutes);
-        console.log(`⏱️ Duración del juego: ${gameData.durationMinutes} minutos`);
+        console.log(`Duración del juego: ${gameData.durationMinutes} minutos`);
       }
 
       const foundPlayers = parsed.cells
@@ -64,6 +65,11 @@ function Board() {
       setLoading(false);
     }
   }, [gameId]);
+
+    // callback para actualizar el estado del poder
+    const handlePowerUpdate = (powerEvent) => {
+        setPowerStatus(powerEvent.status);
+    };
 
   useEffect(() => {
     fetchBoard();
@@ -97,11 +103,13 @@ function Board() {
         connectSocket(
             gameId,
             (updatedPlayers) => {
-                console.log("📡 Actualización de jugadores:", updatedPlayers);
+                console.log("Actualización de jugadores:", updatedPlayers);
                 setPlayers(updatedPlayers);
             },
             (powerEvent) => {
-                console.log("⚡ Evento de poder recibido:", powerEvent);
+                handlePowerUpdate(powerEvent);
+                console.log("Evento de poder recibido:", powerEvent);
+
                 if (powerEvent.status === "AVAILABLE") {
                     setPowerStatus("AVAILABLE");
                 } else if (powerEvent.status === "CLAIMED") {
@@ -110,8 +118,47 @@ function Board() {
                     setPowerStatus("USED");
                 }
             },
-            playerId
+            playerId,
+            (foodEvent) => {
+                if (foodEvent.action === "FOOD_REMOVED") {
+                    setFoods((prevFoods) => prevFoods.filter(f => f.id !== foodEvent.id));
+                } else if (foodEvent.action === "FOOD_ADDED") {
+                    // En caso de luego regenerar comida automáticamente
+                    setFoods((prevFoods) => [
+                        ...prevFoods,
+                        {
+                            id: foodEvent.id,
+                            position: { row: foodEvent.y, col: foodEvent.x },
+                        },
+                    ]);
+                }
+            }
         );
+
+        setTimeout(() => {
+            const stomp = getStompClient();
+            if (stomp) {
+                stomp.subscribe(`/topic/games/${gameId}/events`, (msg) => {
+                    const data = JSON.parse(msg.body);
+                    console.log("Evento recibido:", data);
+                    if (data.event === "GAME_ENDED") {
+                        if (data.winner) {
+                            localStorage.setItem("winnerName", data.winner);
+                        }
+                        // 1. Obtener el stomp client real
+                        const stompClient = getStompClient();
+                        // 2. Desconectar el websocket
+                        if (stompClient) {
+                            stompClient.deactivate().then(() => {
+                                console.log("🔌 STOMP desconectado porque la partida terminó.");
+                            });
+                        }
+                        // 3. Navegar a la pantalla final
+                        navigate("/end-game");
+                    }
+                });
+            }
+        }, 300);
 
         const timer = setTimeout(() => startGame(gameId), 1000);
 
@@ -124,8 +171,13 @@ function Board() {
     if (loading) return <p>Loading...</p>;
     if (!board) return <p>The board could not be loaded.</p>;
 
-    const showPowerButton = powerStatus === "AVAILABLE";
+    const currentPlayer = players.find(p => p.id === playerId);
+    const isPlayerAlive = currentPlayer && currentPlayer.health > 0;
 
+    const showPowerButton =  powerStatus === "AVAILABLE" &&
+    isPlayerAlive &&
+    enabledPowers.length > 0;
+   
     return (
         <div className="game-layout">
             {/* Panel lateral con lista de jugadores y botón de poder */}
@@ -137,9 +189,10 @@ function Board() {
                     <button
                         className="image-button"
                         onClick={() => {
+                            const stompClient = getStompClient();
+                            if (!stompClient) return;
                             console.log("⚡ Power button clicked");
-                            // Aquí puedes publicar el evento al backend:
-                            // stompClient.publish({ destination: `/app/games/${gameId}/claim-power`, body: playerId });
+                            stompClient.publish({ destination: `/app/games/${gameId}/power/claim`, body: JSON.stringify({ gameId, playerId }),});
                         }}
                     >
                         <Power />

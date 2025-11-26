@@ -3,7 +3,6 @@ import React from "react";
 function PlayerCard({ player }) {
     const { name, health, avatar } = player;
 
-    // calcula el porcentaje de vida
     const healthPercent = Math.max(0, Math.min(health, 100));
 
     const getHealthColor = (hp) => {
@@ -11,8 +10,6 @@ function PlayerCard({ player }) {
         if (hp > 35) return "#f1c40f"; // amarillo
         return "#e74c3c"; // rojo
     };
-
-
 
     return (
         <div className="player-card">
