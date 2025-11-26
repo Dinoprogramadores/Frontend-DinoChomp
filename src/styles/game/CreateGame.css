@@ -32,7 +32,17 @@
   font-size: 0.95rem;
 }
 
-.create-form input[type="text"],
+.create-form input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background-color: #3a3a3a;
+    color: white;
+    font-size: 16px;
+    margin-top: 5px;
+}
+
 .create-form select {
   display: block;
   width: 100%;

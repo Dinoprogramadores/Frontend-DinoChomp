@@ -1,4 +1,3 @@
-// src/services/SocketLobby.js
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import API_CONFIG from "../config/config.js";
@@ -20,7 +19,7 @@ export const connectLobbySocket = (gameId, onLobbyUpdate, onStart, player) => {
 
     stompClient.onConnect = () => {
         connected = true;
-        console.log(`✅ Conectado al lobby ${gameId}`);
+        console.log(`Conectado al lobby ${gameId}`);
 
         // Enviar join
         setTimeout(() => {
