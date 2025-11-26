@@ -9,20 +9,27 @@ function EndGame() {
     const winnerAvatar = "/resources/DinoTRex.png"; // Avatar por defecto
 
     useEffect(() => {
-        const fetchWinner = async () => {
-            const gameId = localStorage.getItem("currentGameId");
-            if (gameId) {
-                try {
-                    const winnerData = await getWinner(gameId);
-                    setWinnerName(winnerData.name);
-                } catch (error) {
-                    console.error("Failed to fetch winner:", error);
-                    setWinnerName("No winner could be determined");
-                }
-            }
-        };
+        const storedWinner = localStorage.getItem("winnerName");
 
-        fetchWinner();
+        if (storedWinner) {
+            // Si ya llegó el ganador por WebSocket, úsalo
+            setWinnerName(storedWinner);
+        } else {
+            // Si no, pedirlo al backend
+            const fetchWinner = async () => {
+                const gameId = localStorage.getItem("currentGameId");
+                if (gameId) {
+                    try {
+                        const winnerData = await getWinner(gameId);
+                        setWinnerName(winnerData.name);
+                    } catch (error) {
+                        console.error("Failed to fetch winner:", error);
+                        setWinnerName("No winner could be determined");
+                    }
+                }
+            };
+            fetchWinner();
+        }
 
         // Limpiar localStorage después de un breve retraso para asegurar que se obtuvo el gameId
         const cleanupTimeout = setTimeout(() => {
@@ -37,6 +44,7 @@ function EndGame() {
     }, []);
 
     const handleGoHome = () => {
+        localStorage.removeItem("winnerName");
         navigate("/", { replace: true });
     };
 

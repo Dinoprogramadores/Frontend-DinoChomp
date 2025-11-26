@@ -10,21 +10,19 @@ import { connectSocket, sendMove, startGame, stopGame } from "../../services/Soc
 import {getBoardIdByGame, getGameData} from "../../services/GameService.js";
 import Timer from "../../components/game/Timer.jsx";
 import { getStompClient } from '../../services/Socket.js';
+import { useNavigate } from "react-router-dom";
 
 function Board() {
+    const navigate = useNavigate();
     const [board, setBoard] = useState(null);
     const [players, setPlayers] = useState([]);
     const [foods, setFoods] = useState([]);
     const [loading, setLoading] = useState(true);
     const [powerStatus, setPowerStatus] = useState(null);
-
     const gameId = localStorage.getItem("currentGameId");
     const playerId = localStorage.getItem("playerId");
     const enabledPowers = JSON.parse(localStorage.getItem("gamePowers") || "[]");
-
-    
-
-  const [durationMinutes, setDurationMinutes] = useState(null);
+    const [durationMinutes, setDurationMinutes] = useState(null);
 
     /**
      * Carga inicial del tablero desde el backend (estado base del juego)
@@ -104,8 +102,9 @@ function Board() {
                 setPlayers(updatedPlayers);
             },
             (powerEvent) => {
-                handlePowerUpdate
+                handlePowerUpdate(powerEvent);
                 console.log("Evento de poder recibido:", powerEvent);
+
                 if (powerEvent.status === "AVAILABLE") {
                     setPowerStatus("AVAILABLE");
                 } else if (powerEvent.status === "CLAIMED") {
@@ -130,6 +129,31 @@ function Board() {
                 }
             }
         );
+
+        setTimeout(() => {
+            const stomp = getStompClient();
+            if (stomp) {
+                stomp.subscribe(`/topic/games/${gameId}/events`, (msg) => {
+                    const data = JSON.parse(msg.body);
+                    console.log("Evento recibido:", data);
+                    if (data.event === "GAME_ENDED") {
+                        if (data.winner) {
+                            localStorage.setItem("winnerName", data.winner);
+                        }
+                        // 1. Obtener el stomp client real
+                        const stompClient = getStompClient();
+                        // 2. Desconectar el websocket
+                        if (stompClient) {
+                            stompClient.deactivate().then(() => {
+                                console.log("🔌 STOMP desconectado porque la partida terminó.");
+                            });
+                        }
+                        // 3. Navegar a la pantalla final
+                        navigate("/end-game");
+                    }
+                });
+            }
+        }, 300);
 
         const timer = setTimeout(() => startGame(gameId), 1000);
 
