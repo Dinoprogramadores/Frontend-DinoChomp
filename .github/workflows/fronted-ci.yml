@@ -35,5 +35,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          projectKey: Dinoprogramadores_Frontend-DinoChomp
-          organization: dinoprogramadores
+          projectBaseDir: .
+          args: >
+            -Dsonar.projectKey=Dinoprogramadores_Frontend-DinoChomp
+            -Dsonar.organization=dinoprogramadores
+            -Dsonar.host.url=https://sonarcloud.io
