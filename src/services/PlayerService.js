@@ -12,3 +12,14 @@ export const createPlayer = async (playerData) => {
         throw error;
     }
 };
+
+export const getPlayerByEmail = async (email) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/email/${email}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching player by email:", error);
+        throw error;
+    }
+};
+

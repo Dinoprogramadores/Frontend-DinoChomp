@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../config/supabaseClient.js";
+import { createPlayer, getPlayerByEmail } from "../../services/PlayerService";
 import "../../styles/game/Home.css";
 import DinoLogo2 from "../../../public/resources/DinoLogo2.png"; // logo dinochomp
 import DinoNombre from "../../../public/resources/DinoName.png"; // logo dinochomp
@@ -9,6 +10,7 @@ function Home() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [playerName, setPlayerName] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -25,37 +27,75 @@ function Home() {
   }, [navigate]);
 
   const handleSubmit = async (e) => {
-// ... existing code ...
     e.preventDefault();
     setLoading(true);
     setError(null);
     setMessage(null);
 
-    try {
-      if (isSignUp) {
-        // Crear nueva cuenta
-        const { error } = await supabase.auth.signUp({
+    if (isSignUp) {
+      // --- Lógica de Registro ---
+      if (!playerName.trim()) {
+        setError("Por favor, introduce un nombre de jugador.");
+        setLoading(false);
+        return;
+      }
+      try {
+        // 1. Registrar en Supabase
+        const { error: authError } = await supabase.auth.signUp({
           email,
           password,
         });
-        if (error) throw error;
-        setMessage("¡Cuenta creada! Revisa tu correo para verificarla.");
-        setIsSignUp(false); // Vuelve a la vista de login
-      } else {
-        // Iniciar sesión
-        const { data, error } = await supabase.auth.signInWithPassword({
+        if (authError) throw authError;
+
+        // 2. Crear jugador en el backend
+        const newPlayer = {
+          name: playerName,
+          email: email,
+          password: password, // Enviar la contraseña real
+          positionX: 0,
+          positionY: 0,
+          health: 100,
+          alive: true,
+        };
+        const createdPlayer = await createPlayer(newPlayer);
+
+        // 3. Guardar datos del jugador
+        localStorage.setItem("playerId", createdPlayer.id);
+        localStorage.setItem("playerName", createdPlayer.name);
+
+        setMessage("¡Cuenta creada! Revisa tu correo para verificarla. Serás redirigido.");
+        setTimeout(() => navigate("/select-game"), 2000);
+
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // --- Lógica de Inicio de Sesión ---
+      try {
+        // 1. Iniciar sesión en Supabase
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) throw error;
-        if (data.user) {
+        if (authError) throw authError;
+
+        if (authData.user) {
+          // 2. Obtener datos del jugador del backend
+          const playerData = await getPlayerByEmail(email);
+
+          // 3. Guardar datos del jugador
+          localStorage.setItem("playerId", playerData.id);
+          localStorage.setItem("playerName", playerData.name);
+
           navigate("/select-game");
         }
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -67,6 +107,15 @@ function Home() {
         <div className="auth-form">
         <h2>{isSignUp ? "Crear Cuenta" : "Iniciar Sesión"}</h2>
         <form onSubmit={handleSubmit}>
+          {isSignUp && (
+            <input
+              type="text"
+              placeholder="Tu nombre de jugador"
+              value={playerName}
+              required
+              onChange={(e) => setPlayerName(e.target.value)}
+            />
+          )}
           <input
             type="email"
             placeholder="Tu correo electrónico"
