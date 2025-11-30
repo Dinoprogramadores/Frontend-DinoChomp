@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/game/CreateGame.css";
 import { createGame } from "../../services/GameService.js";
+import LogoutButton from "../../components/auth/LogoutButton.jsx";
 
 const AVAILABLE_POWERS = ["Healing"];
 
@@ -64,6 +65,7 @@ function CreateGame() {
     return (
         <div className="create-container">
             <div className="create-panel">
+                <LogoutButton />
                 <h2>Create Game</h2>
                 <form className="create-form" onSubmit={handleSubmit}>
                     <label>

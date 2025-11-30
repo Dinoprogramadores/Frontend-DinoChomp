@@ -5,6 +5,7 @@ import { fetchDinosaurs } from "../../services/DinosaurService.js";
 import { createPlayer } from "../../services/PlayerService.js";
 import { addPlayerDinosaur } from "../../services/GameService.js";
 import Player from "../../components/game/Player.jsx";
+import LogoutButton from "../../components/auth/LogoutButton.jsx";
 
 function SelectDino() {
     const location = useLocation();
@@ -73,6 +74,7 @@ function SelectDino() {
 
     return (
         <div className="selectdino-container">
+            <LogoutButton />
             <div className="selectdino-panel">
                 <h2>Select your dinosaur</h2>
                 {gameName && <div className="selectdino-game">Game: {gameName}</div>}

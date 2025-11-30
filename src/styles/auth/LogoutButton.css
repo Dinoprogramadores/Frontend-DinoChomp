@@ -1,0 +1,18 @@
+.logout-button {
+    position: absolute;
+    top: 1rem;
+    right: 3rem;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+}
+
+.logout-button:hover {
+    background-color: #d32f2f;
+}
+
