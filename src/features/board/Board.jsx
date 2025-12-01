@@ -165,19 +165,6 @@ function Board() {
         };
     }, [gameId, playerId]);
 
-    // DEBUG TEMPORAL - BORRAR DESPUÉS
-    useEffect(() => {
-        console.log("🔍 === ESTADO COMPLETO DEL BOTÓN ===");
-        console.log("powerStatus:", powerStatus);
-        console.log("powerStatus === 'AVAILABLE':", powerStatus === "AVAILABLE");
-        console.log("isPlayerAlive:", isPlayerAlive);
-        console.log("currentPlayer:", currentPlayer);
-        console.log("enabledPowers:", enabledPowers);
-        console.log("enabledPowers.length:", enabledPowers.length);
-        console.log("showPowerButton:", showPowerButton);
-        console.log("=====================================");
-    }, [powerStatus, isPlayerAlive, currentPlayer, enabledPowers, showPowerButton]);
-
     if (loading) return <p>Loading...</p>;
     if (!board) return <p>The board could not be loaded.</p>;
    
