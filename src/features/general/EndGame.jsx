@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getWinner } from "../../services/GameService";
 import "../../styles/game/EndGame.css";
+import LogoutButton from "../../components/auth/LogoutButton.jsx";
 
 function EndGame() {
     const navigate = useNavigate();
@@ -50,6 +51,7 @@ function EndGame() {
 
     return (
         <div className="endgame-container">
+            <LogoutButton />
             <img src="/resources/DinoEnd.png" alt="End Game" className="endgame-banner" />
             <img src="/resources/DinoWinner.png" alt="Winner title" className="endgame-winner-banner" />
 

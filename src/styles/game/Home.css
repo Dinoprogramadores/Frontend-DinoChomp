@@ -53,3 +53,51 @@ html, body {
   background-color: #45a049;
   transform: scale(1.1);
 }
+
+/* Formulario de autenticación */
+.auth-form {
+  padding: 2rem;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.auth-form h2 {
+  color: #8443da;
+  margin-bottom: 1rem;
+    font-size: 3.0rem;
+}
+
+.auth-form input {
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.auth-error {
+  color: #ff6b6b;
+  margin-top: 0.5rem;
+}
+
+.auth-message {
+  color: #84fab0;
+  margin-top: 0.5rem;
+}
+
+.toggle-auth-button {
+  background: none;
+  border: none;
+  color: Black;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 1.0rem;
+  margin-top: 1rem;
+}
+
+.toggle-auth-button:hover {
+  color: #af0000;
+}
