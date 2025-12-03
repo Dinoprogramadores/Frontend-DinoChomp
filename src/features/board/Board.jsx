@@ -21,16 +21,13 @@ function Board() {
     const [powerStatus, setPowerStatus] = useState("UNAVAILABLE");
     const gameId = localStorage.getItem("currentGameId");
     const playerId = localStorage.getItem("playerId");
-    const enabledPowers = JSON.parse(localStorage.getItem("gamePowers") || "[]");
     const [durationMinutes, setDurationMinutes] = useState(null);
 
     const currentPlayer = players.find(p => p.id === playerId);
     const isPlayerAlive = currentPlayer && currentPlayer.health > 0;
 
     const showPowerButton =  powerStatus === "AVAILABLE" &&
-        isPlayerAlive &&
-        enabledPowers.length > 0;
-
+        isPlayerAlive
     /**
      * Carga inicial del tablero desde el backend (estado base del juego)
      */
