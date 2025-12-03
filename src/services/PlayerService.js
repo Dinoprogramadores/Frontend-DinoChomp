@@ -15,7 +15,7 @@ export const createPlayer = async (playerData) => {
 
 export const getPlayerByEmail = async (email) => {
     try {
-        const response = await axios.get(`${BASE_URL}/email/${email}`);
+        const response = await axios.get(`${BASE_URL}/email?email=${email}`);
         return response.data;
     } catch (error) {
         console.error("Error fetching player by email:", error);

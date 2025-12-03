@@ -79,6 +79,7 @@ function Home() {
           email,
           password,
         });
+
         if (authError) throw authError;
 
         if (authData.user) {
@@ -88,6 +89,7 @@ function Home() {
           // 3. Guardar datos del jugador
           localStorage.setItem("playerId", playerData.id);
           localStorage.setItem("playerName", playerData.name);
+          localStorage.setItem("playerEmail", playerData.email);
 
           navigate("/select-game");
         }
