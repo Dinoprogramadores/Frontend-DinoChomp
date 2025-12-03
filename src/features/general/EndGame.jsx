@@ -34,10 +34,6 @@ function EndGame() {
 
         // Limpiar localStorage después de un breve retraso para asegurar que se obtuvo el gameId
         const cleanupTimeout = setTimeout(() => {
-            localStorage.removeItem("currentGameId");
-            localStorage.removeItem("selectedDinoName");
-            localStorage.removeItem("playerId");
-            localStorage.removeItem("playerName");
             sessionStorage.clear();
         }, 1000);
 
