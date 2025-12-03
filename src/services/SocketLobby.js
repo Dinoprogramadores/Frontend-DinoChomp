@@ -37,7 +37,7 @@ export const connectLobbySocket = (gameId, onLobbyUpdate, onStart, player) => {
 
         // Suscribirse al evento de inicio
         stompClient.subscribe(`/topic/lobbies/${gameId}/start`, () => {
-            console.log("🚀 Juego iniciado desde el host");
+            console.log("Juego iniciado desde el host");
             onStart();
         });
     };
