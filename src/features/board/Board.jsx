@@ -18,11 +18,18 @@ function Board() {
     const [players, setPlayers] = useState([]);
     const [foods, setFoods] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [powerStatus, setPowerStatus] = useState(null);
+    const [powerStatus, setPowerStatus] = useState("UNAVAILABLE");
     const gameId = localStorage.getItem("currentGameId");
     const playerId = localStorage.getItem("playerId");
     const enabledPowers = JSON.parse(localStorage.getItem("gamePowers") || "[]");
     const [durationMinutes, setDurationMinutes] = useState(null);
+
+    const currentPlayer = players.find(p => p.id === playerId);
+    const isPlayerAlive = currentPlayer && currentPlayer.health > 0;
+
+    const showPowerButton =  powerStatus === "AVAILABLE" &&
+        isPlayerAlive &&
+        enabledPowers.length > 0;
 
     /**
      * Carga inicial del tablero desde el backend (estado base del juego)
@@ -67,9 +74,10 @@ function Board() {
   }, [gameId]);
 
     // callback para actualizar el estado del poder
-    const handlePowerUpdate = (powerEvent) => {
+    const handlePowerUpdate = useCallback((powerEvent) => {
+        console.log("⚡ Actualizando estado del poder:", powerEvent);
         setPowerStatus(powerEvent.status);
-    };
+    }, []);
 
   useEffect(() => {
     fetchBoard();
@@ -106,18 +114,7 @@ function Board() {
                 console.log("Actualización de jugadores:", updatedPlayers);
                 setPlayers(updatedPlayers);
             },
-            (powerEvent) => {
-                handlePowerUpdate(powerEvent);
-                console.log("Evento de poder recibido:", powerEvent);
-
-                if (powerEvent.status === "AVAILABLE") {
-                    setPowerStatus("AVAILABLE");
-                } else if (powerEvent.status === "CLAIMED") {
-                    setPowerStatus(`CLAIMED_BY_${powerEvent.owner}`);
-                } else if (powerEvent.status === "USED") {
-                    setPowerStatus("USED");
-                }
-            },
+            handlePowerUpdate,
             playerId,
             (foodEvent) => {
                 if (foodEvent.action === "FOOD_REMOVED") {
@@ -170,13 +167,6 @@ function Board() {
 
     if (loading) return <p>Loading...</p>;
     if (!board) return <p>The board could not be loaded.</p>;
-
-    const currentPlayer = players.find(p => p.id === playerId);
-    const isPlayerAlive = currentPlayer && currentPlayer.health > 0;
-
-    const showPowerButton =  powerStatus === "AVAILABLE" &&
-    isPlayerAlive &&
-    enabledPowers.length > 0;
    
     return (
         <div className="game-layout">

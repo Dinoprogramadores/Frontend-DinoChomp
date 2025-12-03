@@ -5,13 +5,21 @@ import '../../styles/auth/LogoutButton.css';
 const LogoutButton = () => {
 
     const handleLogout = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-            console.error('Error logging out:', error);
-        } else {
-            // Forzar la recarga para limpiar cualquier estado y asegurar que el usuario es redirigido
+        const { data: sessionData } = await supabase.auth.getSession();
+
+        if (!sessionData.session) {
+            console.warn("No active session. Redirecting...");
             window.location.href = '/';
+            return;
         }
+
+        const { error } = await supabase.auth.signOut({ scope: 'local' });
+
+        if (error) {
+            console.error("Error logging out:", error.message);
+        }
+
+        window.location.href = '/';
     };
 
     return (
@@ -22,4 +30,3 @@ const LogoutButton = () => {
 };
 
 export default LogoutButton;
-

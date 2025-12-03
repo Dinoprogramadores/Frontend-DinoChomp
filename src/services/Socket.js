@@ -35,6 +35,7 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId, o
                     const updated = {
                         id: updatedPlayer.id,
                         name: updatedPlayer.name,
+                        email: updatedPlayer.email,
                         health: updatedPlayer.health,
                         isAlive: updatedPlayer.isAlive,
                         position: { row: updatedPlayer.positionY, col: updatedPlayer.positionX },
@@ -71,7 +72,7 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId, o
         stompClient.subscribe(`/topic/games/${gameId}/power`, (message) => {
             try {
                 const powerEvent = JSON.parse(message.body);
-                console.log("⚡ Evento de poder recibido:", powerEvent);
+                console.log("Evento de poder recibido:", powerEvent);
 
                 if (onPowerUpdate) {
                     onPowerUpdate(powerEvent);
@@ -90,6 +91,7 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId, o
                         type: "PLAYER",
                         id: Array.isArray(playerId) ? playerId[0] : playerId,
                         name: localStorage.getItem("playerName") || "Jugador",
+                        email: localStorage.getItem("playerEmail") || "Jugador",
                         positionX: 0,
                         positionY: 0,
                         health: 100,
