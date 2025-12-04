@@ -21,14 +21,6 @@ export const connectLobbySocket = (gameId, onLobbyUpdate, onStart, player) => {
         connected = true;
         console.log(`Conectado al lobby ${gameId}`);
 
-        // Enviar join
-        setTimeout(() => {
-            stompClient.publish({
-                destination: `/app/lobbies/${gameId}/join`,
-                body: JSON.stringify(player),
-            });
-        }, 300);
-
         // Suscribirse a actualizaciones de jugadores
         stompClient.subscribe(`/topic/lobbies/${gameId}/players`, (message) => {
             const updatedPlayers = JSON.parse(message.body);
@@ -41,6 +33,14 @@ export const connectLobbySocket = (gameId, onLobbyUpdate, onStart, player) => {
             onStart();
         });
     };
+
+    // Enviar join
+    setTimeout(() => {
+        stompClient.publish({
+            destination: `/app/lobbies/${gameId}/join`,
+            body: JSON.stringify(player),
+        });
+    }, 300);
 
     stompClient.activate();
 };
