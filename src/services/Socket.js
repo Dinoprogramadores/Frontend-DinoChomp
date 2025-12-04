@@ -16,7 +16,7 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId, o
     }
 
     stompClient = new Client({
-        webSocketFactory: () => new SockJS(`${API_CONFIG.BASE_URL}/ws`),
+        webSocketFactory: () => new SockJS(`${API_CONFIG.BASE_URL}/ws/games`),
         reconnectDelay: 5000,
         debug: (str) => console.log("[STOMP]", str),
     });
