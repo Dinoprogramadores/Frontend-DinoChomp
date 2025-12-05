@@ -12,18 +12,11 @@ function CreateGame() {
     const [name, setName] = useState("");
     const [time, setTime] = useState(3);
     const [foodCount, setFoodCount] = useState(1);
-    const [powers, setPowers] = useState([]);
+    const [powers] = useState([]);
 
     const width = 10;
     const height = 6;
 
-    const togglePower = (power) => {
-        setPowers((prev) =>
-            prev.includes(power)
-                ? prev.filter((p) => p !== power)
-                : [...prev, power]
-        );
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -54,7 +47,6 @@ function CreateGame() {
             console.log("Game created:", created);
             localStorage.setItem("currentGameId", name.trim());
             localStorage.setItem("currentBoardId", created.boardId);
-            localStorage.setItem("gamePowers", JSON.stringify(powers.map((p) => p.toUpperCase())));
             navigate("/select-dino");
         } catch (error) {
             console.error("Error creating game:", error);
@@ -109,15 +101,10 @@ function CreateGame() {
                     </label>
 
                     <fieldset className="powers-field">
-                        <legend>Select Powers</legend>
+                        <legend>Powers</legend>
                         <div className="powers-list">
                             {AVAILABLE_POWERS.map((p) => (
                                 <label key={p} className="power-item">
-                                    <input
-                                        type="checkbox"
-                                        checked={powers.includes(p)}
-                                        onChange={() => togglePower(p)}
-                                    />
                                     {p}
                                 </label>
                             ))}

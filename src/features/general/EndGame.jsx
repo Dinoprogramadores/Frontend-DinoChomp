@@ -7,24 +7,25 @@ import LogoutButton from "../../components/auth/LogoutButton.jsx";
 function EndGame() {
     const navigate = useNavigate();
     const [winnerName, setWinnerName] = useState("Determining winner...");
-    const winnerAvatar = "/resources/DinoTRex.png"; // Avatar por defecto
+    const winnerAvatar = "/resources/DinoTRex.png";
 
     useEffect(() => {
         const storedWinner = localStorage.getItem("winnerName");
+        const endMessage = localStorage.getItem("endMessage");
+
+        console.log("🏁 EndGame montado. Winner:", storedWinner, "Message:", endMessage);
 
         if (storedWinner) {
-            // Si ya llegó el ganador por WebSocket, úsalo
             setWinnerName(storedWinner);
         } else {
-            // Si no, pedirlo al backend
             const fetchWinner = async () => {
                 const gameId = localStorage.getItem("currentGameId");
                 if (gameId) {
                     try {
                         const winnerData = await getWinner(gameId);
-                        setWinnerName(winnerData.name);
+                        setWinnerName(winnerData.name || "No winner");
                     } catch (error) {
-                        console.error("Failed to fetch winner:", error);
+                        console.error("❌ Failed to fetch winner:", error);
                         setWinnerName("No winner could be determined");
                     }
                 }
@@ -32,20 +33,24 @@ function EndGame() {
             fetchWinner();
         }
 
-        // Limpiar localStorage después de un breve retraso para asegurar que se obtuvo el gameId
-        const cleanupTimeout = setTimeout(() => {
-            localStorage.removeItem("currentGameId");
-            localStorage.removeItem("selectedDinoName");
-            localStorage.removeItem("playerId");
-            localStorage.removeItem("playerName");
-            sessionStorage.clear();
-        }, 1000);
-
-        return () => clearTimeout(cleanupTimeout);
+        // ✅ Limpiar SOLO los datos específicos de la partida terminada
+        return () => {
+            console.log("🧹 EndGame desmontado");
+            // NO limpiar todo el localStorage aquí
+            // localStorage.removeItem("winnerName");
+            // localStorage.removeItem("winnerId");
+            // localStorage.removeItem("endMessage");
+        };
     }, []);
 
     const handleGoHome = () => {
+        // ✅ Limpiar datos de la partida cuando el usuario hace clic
         localStorage.removeItem("winnerName");
+        localStorage.removeItem("winnerId");
+        localStorage.removeItem("endMessage");
+        localStorage.removeItem("currentGameId");
+
+        console.log("🏠 Volviendo al inicio");
         navigate("/", { replace: true });
     };
 

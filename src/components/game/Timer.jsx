@@ -1,50 +1,56 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { sendTimerStart, sendTimerStop } from "../../services/Socket";
+import React, { useEffect, useState, useRef } from "react";
 import "../../styles/board/Timer.css";
 
 function Timer({ durationMinutes, isRunning = true, gameId }) {
     const [timeRemaining, setTimeRemaining] = useState(0);
-    const [finished, setFinished] = useState(false); // ← Nuevo estado
-    const navigate = useNavigate();
+    const intervalRef = useRef(null);
+    const hasNotifiedEnd = useRef(false);
 
-    // Convertir minutos a segundos y notificar inicio
+    // Inicializar timer
     useEffect(() => {
         if (durationMinutes !== undefined && durationMinutes !== null) {
             const initialSeconds = durationMinutes * 60;
             setTimeRemaining(initialSeconds);
-
-            if (initialSeconds > 0) {
-                sendTimerStart(gameId);
-            }
+            hasNotifiedEnd.current = false;
+            console.log(`⏱️ Timer iniciado: ${durationMinutes} minutos (${initialSeconds} segundos)`);
         }
-    }, [durationMinutes, gameId]);
+    }, [durationMinutes]);
 
     // Temporizador descendente
     useEffect(() => {
-        if (!isRunning || timeRemaining <= 0) return;
+        // Limpiar interval anterior si existe
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
 
-        const interval = setInterval(() => {
+        if (!isRunning || timeRemaining <= 0) {
+            return;
+        }
+
+        intervalRef.current = setInterval(() => {
             setTimeRemaining((prev) => {
                 if (prev <= 1) {
-                    clearInterval(interval);
-                    sendTimerStop(gameId);
-                    setFinished(true);          // ← Notificamos que terminó
+                    if (!hasNotifiedEnd.current) {
+                        hasNotifiedEnd.current = true;
+                        console.log("⏰ Timer terminado");
+                        // ✅ NO navegar aquí, el backend se encarga con endGame()
+                    }
                     return 0;
                 }
                 return prev - 1;
             });
         }, 1000);
 
-        return () => clearInterval(interval);
-    }, [isRunning, timeRemaining, gameId]);
-
-    // Navegar cuando el timer termina (SIN violar las reglas de React)
-    useEffect(() => {
-        if (finished) {
-            navigate("/end-game");
-        }
-    }, [finished, navigate]);
+        // ✅ CRÍTICO: Limpiar el interval cuando el componente se desmonte
+        return () => {
+            if (intervalRef.current) {
+                console.log("🧹 Limpiando interval del timer");
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
+    }, [isRunning, timeRemaining]); // ❌ Quité gameId de las dependencias
 
     const formatTime = (seconds) => {
         const minutes = Math.floor(seconds / 60);
