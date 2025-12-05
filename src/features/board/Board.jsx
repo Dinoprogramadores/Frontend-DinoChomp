@@ -17,6 +17,9 @@ import {
 import { getBoardIdByGame, getGameData } from "../../services/GameService.js";
 import Timer from "../../components/game/Timer.jsx";
 import { useNavigate } from "react-router-dom";
+import { encryptJSON } from "../../services/crypto.js"
+
+
 
 function Board() {
     const navigate = useNavigate();
@@ -78,6 +81,24 @@ function Board() {
             setLoading(false);
         }
     }, [gameId]);
+
+    const handleClaimPower = async () => {
+        const stompClient = getStompClient();
+        if (!stompClient) {
+            console.warn("⚠️ No hay conexión STOMP");
+            return;
+        }
+
+        const payload = { gameId, playerId };
+        const encrypted = await encryptJSON(payload); // 🔒 cifrado
+
+        stompClient.publish({
+            destination: `/app/games/${gameId}/power/claim`,
+            body: encrypted, // Enviar JSON cifrado
+        });
+
+        console.log("⚡ Poder reclamado (cifrado):", encrypted);
+    };
 
     /**
      * Callback para actualizar el estado del poder
@@ -213,21 +234,7 @@ function Board() {
                 <PlayerList players={players} />
 
                 {showPowerButton && (
-                    <button
-                        className="image-button"
-                        onClick={() => {
-                            const stompClient = getStompClient();
-                            if (!stompClient) {
-                                console.warn("⚠️ No hay conexión STOMP");
-                                return;
-                            }
-                            console.log("⚡ Reclamando poder");
-                            stompClient.publish({
-                                destination: `/app/games/${gameId}/power/claim`,
-                                body: JSON.stringify({ gameId, playerId }),
-                            });
-                        }}
-                    >
+                    <button className="image-button" onClick={handleClaimPower}>
                         <Power />
                     </button>
                 )}
