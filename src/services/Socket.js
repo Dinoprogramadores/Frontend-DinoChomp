@@ -1,6 +1,9 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import API_CONFIG from "../config/config.js";
+import { encryptJSON } from "../services/crypto.js";
+import { decryptJSON } from "../services/crypto.js";
+
 
 let stompClient = null;
 let connected = false;
@@ -25,9 +28,10 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId, o
         connected = true;
         console.log(`Conectado al juego ${gameId}`);
 
-        stompClient.subscribe(`/topic/games/${gameId}/players`, (message) => {
+        stompClient.subscribe(`/topic/games/${gameId}/players`, async (message) => {
             try {
-                const updatedPlayer = JSON.parse(message.body);
+                const json = await decryptJSON(message.body);
+                const updatedPlayer = JSON.parse(json);
                 console.log("Movimiento recibido:", updatedPlayer);
 
                 onPlayerUpdate((prevPlayers) => {
@@ -55,9 +59,10 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId, o
         });
         console.log(`Suscrito al topic: /topic/games/${gameId}/players`);
 
-        stompClient.subscribe(`/topic/games/${gameId}/food`, (message) => {
+        stompClient.subscribe(`/topic/games/${gameId}/food`, async (message) => {
             try {
-                const foodEvent = JSON.parse(message.body);
+                const json = await decryptJSON(message.body);
+                const foodEvent = JSON.parse(json);
                 console.log("Evento de comida recibido:", foodEvent);
 
                 if (onFoodUpdate) {
@@ -69,9 +74,10 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId, o
         });
         console.log(`Suscrito al topic: /topic/games/${gameId}/food`);
 
-        stompClient.subscribe(`/topic/games/${gameId}/power`, (message) => {
+        stompClient.subscribe(`/topic/games/${gameId}/power`, async (message) => {
             try {
-                const powerEvent = JSON.parse(message.body);
+                const json = await decryptJSON(message.body);
+                const powerEvent = JSON.parse(json);
                 console.log("Evento de poder recibido:", powerEvent);
 
                 if (onPowerUpdate) {
@@ -83,21 +89,20 @@ export const connectSocket = (gameId, onPlayerUpdate, onPowerUpdate, playerId, o
         });
         console.log(`Suscrito al topic: /topic/games/${gameId}/power`);
 
-        setTimeout(() => {
+        setTimeout(async () => {
             if (stompClient && stompClient.connected) {
-                stompClient.publish({
-                    destination: `/app/games/${gameId}/join`,
-                    body: JSON.stringify({
-                        type: "PLAYER",
-                        id: Array.isArray(playerId) ? playerId[0] : playerId,
-                        name: localStorage.getItem("playerName") || "Jugador",
-                        email: localStorage.getItem("playerEmail") || "Jugador",
-                        positionX: 0,
-                        positionY: 0,
-                        health: 100,
-                        alive: true,
-                    }),
+
+                await sendEncrypted(`/app/games/${gameId}/join`, {
+                    type: "PLAYER",
+                    id: playerId,
+                    name: localStorage.getItem("playerName"),
+                    email: localStorage.getItem("playerEmail"),
+                    positionX: 0,
+                    positionY: 0,
+                    health: 100,
+                    alive: true,
                 });
+
                 console.log(`Jugador ${playerId} se unió al juego ${gameId}`);
             }
         }, 300);
@@ -121,49 +126,64 @@ export const getStompClient = () => stompClient;
 /**
  * Envía un movimiento del jugador
  */
-export const sendMove = (playerId, direction, gameId) => {
+export async function sendMove(playerId, direction, gameId)  {
     if (!connected || !stompClient?.connected) {
         console.warn("No conectado al socket, ignorando movimiento.");
         return;
     }
 
-    stompClient.publish({
-        destination: `/app/games/${gameId}/move`,
-        body: JSON.stringify({ playerId, direction }),
+    await sendEncrypted(`/app/games/${gameId}/move`, {
+        playerId,
+        direction
     });
 };
 
 /**
  * Inicia el bucle del juego
  */
-export const startGame = (gameId) => {
+export async function startGame (gameId) {
     if (!connected || !stompClient?.connected) return;
-    stompClient.publish({ destination: `/app/games/${gameId}/start` });
+    await sendEncrypted(`/app/games/${gameId}/start`, { gameId });
 };
 
 /**
  * Detiene el bucle del juego
  */
-export const stopGame = (gameId) => {
+export async function stopGame(gameId) {
     if (!connected || !stompClient?.connected) return;
-    stompClient.publish({ destination: `/app/games/${gameId}/stop` });
-};
+    await sendEncrypted(`/app/games/${gameId}/stop`, { gameId });
+}
+
 
 /**
  * Notifica al backend que el temporizador ha iniciado
  */
-export const sendTimerStart = (gameId) => {
-  if (!connected || !stompClient?.connected) return;
-  stompClient.publish({ destination: `/games/${gameId}/timer/start` });
-  console.log(`Notificado inicio de timer para el juego ${gameId}`);
-};
+export async function sendTimerStart(gameId) {
+    if (!connected || !stompClient?.connected) return;
+    await sendEncrypted(`/games/${gameId}/timer/start`, { gameId });
+}
+
 
 /**
  * Notifica al backend que el temporizador ha terminado
  */
-export const sendTimerStop = (gameId) => {
-  if (!connected || !stompClient?.connected) return;
-  stompClient.publish({ destination: `/games/${gameId}/timer/stop` });
-  console.log(`Notificado fin de timer para el juego ${gameId}`);
-};
+export async function sendTimerStop(gameId) {
+    if (!connected || !stompClient?.connected) return;
+    await sendEncrypted(`/games/${gameId}/timer/stop`, { gameId });
+}
 
+
+async function sendEncrypted(destination, data) {
+    const { iv, ciphertext } = await encryptJSON(data);
+
+    const envelope = {
+        iv,
+        ciphertext,
+        timestamp: Date.now()
+    };
+
+    stompClient.publish({
+        destination,
+        body: JSON.stringify(envelope)
+    });
+}

@@ -1,6 +1,7 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import API_CONFIG from "../config/config.js";
+import { encryptJSON, decryptJSON } from "../services/crypto";
 
 let stompClient = null;
 let connected = false;
@@ -22,8 +23,9 @@ export const connectLobbySocket = (gameId, onLobbyUpdate, onStart, player) => {
         console.log(`Conectado al lobby ${gameId}`);
 
         // Suscribirse a actualizaciones de jugadores
-        stompClient.subscribe(`/topic/lobbies/${gameId}/players`, (message) => {
-            const updatedPlayers = JSON.parse(message.body);
+        stompClient.subscribe(`/topic/lobbies/${gameId}/players`, async (message) => {
+            const json = await decryptJSON(message.body);
+            const updatedPlayers = JSON.parse(json);
             onLobbyUpdate(updatedPlayers);
         });
 
@@ -35,7 +37,8 @@ export const connectLobbySocket = (gameId, onLobbyUpdate, onStart, player) => {
     };
 
     // Enviar join
-    setTimeout(() => {
+    setTimeout(async () => {
+        const payload = await encryptJSON(player);
         stompClient.publish({
             destination: `/app/lobbies/${gameId}/join`,
             body: JSON.stringify(player),
@@ -45,8 +48,9 @@ export const connectLobbySocket = (gameId, onLobbyUpdate, onStart, player) => {
     stompClient.activate();
 };
 
-export const leaveLobby = (gameId, player) => {
+export const leaveLobby = async (gameId, player) => {
     if (!connected || !stompClient?.connected) return;
+    const payload = await encryptJSON({ ...player, type: "PLAYER" });
     stompClient.publish({
         destination: `/app/lobbies/${gameId}/leave`,
         body: JSON.stringify({
@@ -57,9 +61,11 @@ export const leaveLobby = (gameId, player) => {
     stompClient.deactivate();
 };
 
-export const startLobbyGame = (gameId) => {
+export const startLobbyGame = async (gameId) => {
     if (!connected || !stompClient?.connected) return;
+    const payload = await encryptJSON({ gameId });
     stompClient.publish({
         destination: `/app/lobbies/${gameId}/start`,
     });
 };
+
